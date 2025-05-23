@@ -1,12 +1,32 @@
-CMakeLists.txt.user
+# Build files
+build/
+CMakeFiles/
 CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
 cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
-CMakeUserPresets.json
+Makefile
+
+# Compiled binaries
+*.out
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE-specific files
+.vscode/
+.idea/
+*.sdf
+*.suo
+*.user
+*.opensdf
+*.VC.db
+
+# Logs and temp files
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
