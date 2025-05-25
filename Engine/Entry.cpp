@@ -1,95 +1,45 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
 #include <filesystem>
+
+#include "Graphics/Shader.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/VertexArray.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/Mesh.h"
+#include "Graphics/Renderer.h"
+#include "Graphics/Camera.h"
+#include "Input/Input.h"
+#include "Config/EngineSettings.h"
+
 namespace fs = std::filesystem;
 
 std::string ResolveShaderPath(const std::string &relativePath)
 {
-    fs::path exePath = fs::current_path(); // actual working dir
+    fs::path exePath = fs::current_path();
     fs::path rootPath = exePath;
 
-    // Walk up until we find the known root marker (like the Shaders/ folder)
     while (!fs::exists(rootPath / "Shaders") && rootPath.has_parent_path())
     {
         rootPath = rootPath.parent_path();
     }
 
-    fs::path fullPath = rootPath / "Shaders" / relativePath;
-    return fullPath.string();
+    return (rootPath / "Shaders" / relativePath).string();
 }
 
-// Handle window resize
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    (void)window; // Avoid unused warning
+    (void)window;
     glViewport(0, 0, width, height);
-}
-
-// Load a text file into a string
-std::string LoadFile(const std::string &path)
-{
-    std::ifstream file(path);
-    if (!file.is_open())
-    {
-        std::cerr << "Failed to open file: " << path << "\n";
-        return "";
-    }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
-
-// Create and compile shader
-GLuint CompileShader(GLenum type, const std::string &source)
-{
-    GLuint shader = glCreateShader(type);
-    const char *src = source.c_str();
-    glShaderSource(shader, 1, &src, nullptr);
-    glCompileShader(shader);
-
-    // Check compile status
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-        std::cerr << "Shader compilation error:\n"
-                  << infoLog << "\n";
-    }
-    return shader;
-}
-
-// Link vertex + fragment shaders into a program
-GLuint CreateShaderProgram(const std::string &vertexPath, const std::string &fragmentPath)
-{
-    std::string vertexSource = LoadFile(vertexPath);
-    std::string fragmentSource = LoadFile(fragmentPath);
-
-    GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, vertexSource);
-    GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return program;
 }
 
 int main()
 {
-    // Initialize GLFW
+    // === Init GLFW ===
     if (!glfwInit())
     {
-        std::cerr << "GLFW init failed\n";
+        std::cerr << "Failed to initialize GLFW\n";
         return -1;
     }
 
@@ -100,7 +50,7 @@ int main()
     GLFWwindow *window = glfwCreateWindow(1280, 720, "Voltray", nullptr, nullptr);
     if (!window)
     {
-        std::cerr << "Window creation failed\n";
+        std::cerr << "Failed to create GLFW window\n";
         glfwTerminate();
         return -1;
     }
@@ -114,48 +64,75 @@ int main()
         return -1;
     }
 
-    // Vertex data
+    // === Vertex and Index Data ===
     float vertices[] = {
-        0.0f, 0.5f, 0.0f,   // Top
-        -0.5f, -0.5f, 0.0f, // Left
-        0.5f, -0.5f, 0.0f   // Right
+        -0.5f, -0.5f, 0.0f, // 0
+        0.5f, -0.5f, 0.0f,  // 1
+        0.0f, 0.75f, 0.0f,  // 2
+        -0.25f, 0.0f, 0.0f, // 3
+        0.0f, -0.5f, 0.0f,  // 4
+        0.25f, 0.0f, 0.0f   // 5
     };
 
-    // Setup VAO/VBO
-    GLuint VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    unsigned int indices[] = {
+        0, 4, 3, // Left triangle
+        4, 1, 5, // Right triangle
+        3, 5, 2  // Top triangle
+    };
 
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    // === Create Mesh, Shader, and Renderer ===
+    Mesh triangle(vertices, sizeof(vertices), indices, sizeof(indices) / sizeof(unsigned int));
+    Shader shader(ResolveShaderPath("simple.vert"), ResolveShaderPath("simple.frag"));
+    Shader skyboxShader(ResolveShaderPath("skybox.vert"), ResolveShaderPath("skybox.frag"));
+    Renderer renderer;
 
-    // Vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
+    Camera camera(60.0f, 16.0f / 9.0f, 0.1f, 100.0f);
+    camera.SetPosition(Vec3(0.0f, 0.0f, EngineSettings::CameraMaxDistance / 10.0f));
+    camera.SetTarget(Vec3(0.0f, 0.0f, 0.0f));
 
-    // Load and compile shaders
-    GLuint shaderProgram = CreateShaderProgram(
-        ResolveShaderPath("simple.vert"),
-        ResolveShaderPath("simple.frag"));
+    // === Initialize Input ===
+    Input::Init(window);
+    // double lastFrame = 0.0;
 
-    // Render loop
+    // === OpenGL Settings ===
+    glEnable(GL_DEPTH_TEST); // Enable depth testing for correct 3D rendering
+    glDisable(GL_CULL_FACE);
+
+    // === Main Loop ===
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // Update camera
+        // double currentFrame = glfwGetTime();
+        // double deltaTime = currentFrame - lastFrame;
+        // lastFrame = currentFrame;
 
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        Input::Update();
+        camera.Update();
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);               // Optionally move to EngineSettings if you want
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear both color and depth buffers
+
+        // === Draw skybox gradient ===
+        glDepthMask(GL_FALSE); // Disable depth writes
+        skyboxShader.Bind();
+        // Pass inverse view-projection matrix
+        Mat4 invViewProj = (camera.GetViewProjectionMatrix()).Inverse();
+        skyboxShader.SetUniformMat4("u_InverseViewProj", invViewProj.data);
+        glDrawArrays(GL_TRIANGLES, 0, 3); // Fullscreen triangle
+        glDepthMask(GL_TRUE);             // Re-enable depth writes
+
+        // === Clear depth buffer only ===
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        // Draw the Triangles
+        Mat4 viewProj = camera.GetViewProjectionMatrix();
+        shader.Bind();
+        shader.SetUniformMat4("u_ViewProjection", viewProj.data);
+        renderer.Draw(triangle, shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
 
     glfwDestroyWindow(window);
     glfwTerminate();
