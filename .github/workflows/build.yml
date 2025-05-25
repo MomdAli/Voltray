@@ -1,0 +1,184 @@
+name: Voltray CI/CD
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  # Build type to use
+  BUILD_TYPE: Release
+  # Directory where build files will be generated
+  BUILD_DIR: ${{ github.workspace }}/build
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for proper versioning
+
+    - name: Set up MSVC Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure CMake
+      run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+    - name: Build
+      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
+
+    - name: Create package
+      working-directory: ${{ env.BUILD_DIR }}
+      run: |
+        mkdir -p Voltray-windows
+        copy ${{ env.BUILD_TYPE }}\Voltray.exe Voltray-windows\
+        xcopy /E /I ..\Shaders Voltray-windows\Shaders
+        7z a Voltray-windows.zip Voltray-windows
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Voltray-Windows
+        path: ${{ env.BUILD_DIR }}/Voltray-windows.zip
+
+  macos-build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install dependencies
+      run: |
+        brew update
+        brew install cmake
+        brew install glfw
+
+    - name: Configure CMake
+      run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+    - name: Build
+      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -j4
+
+    - name: Create package
+      working-directory: ${{ env.BUILD_DIR }}
+      run: |
+        mkdir -p Voltray-macos
+        cp Voltray Voltray-macos/
+        cp -R ../Shaders Voltray-macos/
+        zip -r Voltray-macos.zip Voltray-macos
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Voltray-MacOS
+        path: ${{ env.BUILD_DIR }}/Voltray-macos.zip
+
+  linux-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential xorg-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+
+    - name: Configure CMake
+      run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+    - name: Build
+      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -j$(nproc)
+
+    - name: Create package
+      working-directory: ${{ env.BUILD_DIR }}
+      run: |
+        mkdir -p Voltray-linux
+        cp Voltray Voltray-linux/
+        cp -R ../Shaders Voltray-linux/
+        tar -czvf Voltray-linux.tar.gz Voltray-linux
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Voltray-Linux
+        path: ${{ env.BUILD_DIR }}/Voltray-linux.tar.gz
+
+  docs-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz
+
+    - name: Build documentation
+      run: |
+        cmake -B ${{ env.BUILD_DIR }}
+        cmake --build ${{ env.BUILD_DIR }} --target voltray-docs
+
+    - name: Upload docs
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: docs/
+
+  # Deploy docs to GitHub Pages when pushing to main/master
+  deploy-docs:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    needs: docs-build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [windows-build, macos-build, linux-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Voltray-Windows
+          path: artifacts
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Voltray-MacOS
+          path: artifacts
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: Voltray-Linux
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/Voltray-windows.zip
+            artifacts/Voltray-macos.zip
+            artifacts/Voltray-linux.tar.gz
+          draft: false
+          prerelease: false
