@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Math/Vec3.h"
+#include "Math/vec3.h"
 #include "Math/Mat4.h"
 
 /**

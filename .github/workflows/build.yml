@@ -130,7 +130,7 @@ jobs:
         cmake --build ${{ env.BUILD_DIR }} --target voltray-docs
 
     - name: Upload docs
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-pages-artifact@v3
       with:
         path: docs/
 
@@ -148,7 +148,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
@@ -174,7 +174,7 @@ jobs:
           path: artifacts
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/Voltray-windows.zip
