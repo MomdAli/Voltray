@@ -2,6 +2,7 @@
 
 #include "Shader.h"
 #include "Mesh.h"
+#include "Math/Mat4.h"
 
 /**
  * @class Renderer
@@ -18,4 +19,12 @@ class Renderer
 {
 public:
     void Draw(const Mesh &mesh, const Shader &shader) const;
+
+    /**
+     * @brief Draws a mesh with a specific model transformation matrix.
+     * @param mesh The mesh to draw.
+     * @param shader The shader to use for rendering.
+     * @param modelMatrix The model transformation matrix.
+     */
+    void Draw(const Mesh &mesh, const Shader &shader, const Mat4 &modelMatrix) const;
 };

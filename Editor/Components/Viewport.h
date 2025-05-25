@@ -12,10 +12,11 @@
 #include <memory>
 
 #include "../UI/Panel.h"
-#include "Renderer.h"
-#include "Mesh.h"
-#include "Shader.h"
-#include "Camera.h"
+#include "../../Engine/Graphics/Renderer.h"
+#include "../../Engine/Graphics/Mesh.h"
+#include "../../Engine/Graphics/Shader.h"
+#include "../../Engine/Graphics/Camera.h"
+#include "../../Engine/Scene/Scene.h"
 
 namespace Editor::Components
 {
@@ -62,11 +63,9 @@ namespace Editor::Components
         GLuint m_ColorTex = 0;
         GLuint m_DepthRbo = 0;
         int m_FBOWidth = 0;
-        int m_FBOHeight = 0;
-
-        // Scene objects
+        int m_FBOHeight = 0; // Scene objects
         std::unique_ptr<Renderer> m_Renderer;
-        std::unique_ptr<Mesh> m_Mesh;
+        std::unique_ptr<Scene> m_Scene;
         std::unique_ptr<Shader> m_Shader;
         std::unique_ptr<Shader> m_SkyboxShader;
         std::unique_ptr<Camera> m_Camera;
