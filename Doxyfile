@@ -1,6 +1,7 @@
 # Doxyfile minimal configuration for Voltray
 PROJECT_NAME           = Voltray
 OUTPUT_DIRECTORY       = docs
+HTML_OUTPUT            = .
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 RECURSIVE              = YES
