@@ -4,7 +4,7 @@ var searchData=
   ['indexbuffer_1',['IndexBuffer',['../class_index_buffer.html',1,'IndexBuffer'],['../class_index_buffer.html#a41265025aafd1a4dc12b42dd0ac616df',1,'IndexBuffer::IndexBuffer()']]],
   ['indexbuffer_2ecpp_2',['IndexBuffer.cpp',['../_index_buffer_8cpp.html',1,'']]],
   ['indexbuffer_2eh_3',['IndexBuffer.h',['../_index_buffer_8h.html',1,'']]],
-  ['init_4',['Init',['../class_input.html#ac5bb7a9133102be65e1d2227981c4317',1,'Input']]],
+  ['init_4',['Init',['../class_input.html#ac5bb7a9133102be65e1d2227981c4317',1,'Input::Init()'],['../class_editor_1_1_editor_app.html#aa082dd012c0075e69a4badb7d23e4f01',1,'Editor::EditorApp::Init()']]],
   ['input_5',['Input',['../class_input.html',1,'']]],
   ['input_2ecpp_6',['Input.cpp',['../_input_8cpp.html',1,'']]],
   ['input_2eh_7',['Input.h',['../_input_8h.html',1,'']]],

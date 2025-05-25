@@ -1,5 +1,11 @@
 var annotated_dup =
 [
+    [ "Editor", "namespace_editor.html", [
+      [ "EditorApp", "class_editor_1_1_editor_app.html", "class_editor_1_1_editor_app" ],
+      [ "OptionsPanel", "class_editor_1_1_options_panel.html", "class_editor_1_1_options_panel" ],
+      [ "Panel", "class_editor_1_1_panel.html", "class_editor_1_1_panel" ],
+      [ "UI", "class_editor_1_1_u_i.html", "class_editor_1_1_u_i" ]
+    ] ],
     [ "Camera", "class_camera.html", "class_camera" ],
     [ "EngineSettings", "struct_engine_settings.html", null ],
     [ "IndexBuffer", "class_index_buffer.html", "class_index_buffer" ],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mathutil_0',['MathUtil',['../namespace_math_util.html',1,'']]]
+  ['editor_0',['Editor',['../namespace_editor.html',1,'']]]
 ];

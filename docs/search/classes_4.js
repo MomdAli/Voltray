@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['renderer_0',['Renderer',['../class_renderer.html',1,'']]]
+  ['optionspanel_0',['OptionsPanel',['../class_editor_1_1_options_panel.html',1,'Editor']]]
 ];
