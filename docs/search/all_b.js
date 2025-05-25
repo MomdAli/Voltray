@@ -6,5 +6,8 @@ var searchData=
   ['operator_2b_3d_3',['operator+=',['../struct_vec3.html#a4381dd60ef23854bf2c1959ecc549bb4',1,'Vec3']]],
   ['operator_2d_4',['operator-',['../struct_vec3.html#a6f462663ff836de8638c27185eb41b98',1,'Vec3']]],
   ['operator_2d_3d_5',['operator-=',['../struct_vec3.html#aac60bacea3dea181c93e78e3b400fa5e',1,'Vec3']]],
-  ['operator_2f_6',['operator/',['../struct_vec3.html#a95e809870a5e10fbd41bfe29e3c3da99',1,'Vec3']]]
+  ['operator_2f_6',['operator/',['../struct_vec3.html#a95e809870a5e10fbd41bfe29e3c3da99',1,'Vec3']]],
+  ['optionspanel_7',['OptionsPanel',['../class_editor_1_1_options_panel.html',1,'Editor']]],
+  ['optionspanel_2ecpp_8',['OptionsPanel.cpp',['../_options_panel_8cpp.html',1,'']]],
+  ['optionspanel_2eh_9',['OptionsPanel.h',['../_options_panel_8h.html',1,'']]]
 ];

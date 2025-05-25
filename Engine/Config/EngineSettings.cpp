@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "Config/EngineSettings.h"
+#include "EngineSettings.h"
 
 // Default values
 float EngineSettings::CameraOrbitSpeed = 0.3f;

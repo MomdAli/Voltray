@@ -18,6 +18,7 @@ class Input
 {
 public:
     static void Init(GLFWwindow *window);
+    static void Shutdown(); // Add proper shutdown method
     static void Update();
 
     static bool IsKeyPressed(int key);

@@ -18,7 +18,7 @@ if errorlevel 1 (
 
 REM === BUILD PROJECT ===
 echo Building project...
-cmake --build %BUILD_DIR% --config %BUILD_TYPE% --target %BUILD_DOC%
+cmake --build %BUILD_DIR% --config %BUILD_TYPE%
 
 if errorlevel 1 (
     echo Build failed.
@@ -27,8 +27,12 @@ if errorlevel 1 (
 
 echo Build successful!
 
+
+echo Generating documentation...
+cmake --build %BUILD_DIR% --target doc --config %BUILD_TYPE%
+
 REM === RUN THE ENGINE ===
-set EXE_PATH=%BUILD_DIR%\Engine\%BUILD_TYPE%\Voltray.exe
+set EXE_PATH=%BUILD_DIR%\%BUILD_TYPE%\Voltray.exe
 
 if exist "%EXE_PATH%" (
     echo Running Voltray...

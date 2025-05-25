@@ -1,5 +1,6 @@
 var namespaces_dup =
 [
+    [ "Editor", "namespace_editor.html", "namespace_editor" ],
     [ "MathUtil", "namespace_math_util.html", [
       [ "Clamp", "namespace_math_util.html#aa72074592a387adacc862ef978bddf34", null ],
       [ "Lerp", "namespace_math_util.html#ab8027a4b15119a6b1a66c1ecf184a00f", null ],
