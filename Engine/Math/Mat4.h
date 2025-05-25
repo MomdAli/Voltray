@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vec3.h"
+#include "vec3.h"
 
 /**
  * @brief 4x4 Matrix structure for 3D transformations and projections.
