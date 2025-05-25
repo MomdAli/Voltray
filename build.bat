@@ -5,6 +5,7 @@ REM === CONFIG ===
 set BUILD_TYPE=Release
 set GENERATOR="Visual Studio 17 2022"
 set BUILD_DIR=build
+set BUILD_DOC=voltray-docs
 
 REM === GENERATE PROJECT FILES ===
 echo Configuring project with CMake...
@@ -17,7 +18,7 @@ if errorlevel 1 (
 
 REM === BUILD PROJECT ===
 echo Building project...
-cmake --build %BUILD_DIR% --config %BUILD_TYPE%
+cmake --build %BUILD_DIR% --config %BUILD_TYPE% --target %BUILD_DOC%
 
 if errorlevel 1 (
     echo Build failed.

@@ -1,0 +1,11 @@
+# Doxyfile minimal configuration for Voltray
+PROJECT_NAME           = Voltray
+OUTPUT_DIRECTORY       = docs
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+RECURSIVE              = YES
+INPUT                  = Engine Game Editor
+FILE_PATTERNS          = *.h *.cpp
+EXTRACT_ALL            = YES
+QUIET                  = YES
+GENERATE_TREEVIEW      = YES

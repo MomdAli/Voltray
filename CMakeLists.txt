@@ -32,3 +32,15 @@ FetchContent_Declare(
   GIT_TAG        v2.0.8
 )
 FetchContent_MakeAvailable(glad)
+
+find_package(Doxygen QUIET)
+if(DOXYGEN_FOUND)
+    add_custom_target(voltray-docs
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+    )
+else()
+    message(STATUS "Doxygen not found. Documentation target will not be available.")
+endif()
