@@ -39,6 +39,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(imgui)
 
+# Assimp (for mesh loading)
+FetchContent_Declare(
+  assimp
+  GIT_REPOSITORY https://github.com/assimp/assimp.git
+  GIT_TAG        v5.4.3
+)
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+set(ASSIMP_BUILD_SAMPLES OFF)
+set(ASSIMP_INSTALL OFF)
+FetchContent_MakeAvailable(assimp)
+
 # Gather all source files from Engine and Editor (recursively, all .cpp and .h)
 file(GLOB_RECURSE VOLTRAY_SRC CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/Engine/*.cpp"
@@ -69,7 +81,7 @@ add_executable(Voltray ${VOLTRAY_SRC} ${IMGUI_SOURCES} ${CMAKE_SOURCE_DIR}/Vendo
 find_package(OpenGL REQUIRED)
 
 # Link GLFW and OpenGL to the Voltray executable
-target_link_libraries(Voltray PRIVATE glfw OpenGL::GL)
+target_link_libraries(Voltray PRIVATE glfw OpenGL::GL assimp)
 
 # Collect all header directories from Engine and Editor recursively
 file(GLOB_RECURSE ENGINE_HEADERS "${CMAKE_SOURCE_DIR}/Engine/*.h")
@@ -82,12 +94,13 @@ foreach(header ${ENGINE_HEADERS} ${EDITOR_HEADERS})
 endforeach()
 list(REMOVE_DUPLICATES ALL_HEADER_DIRS)
 
-# Add ImGui, glad, glfw, and root Engine/Editor include dirs
+# Add ImGui, glad, glfw, assimp, and root Engine/Editor include dirs
 list(APPEND ALL_HEADER_DIRS
     ${CMAKE_SOURCE_DIR}/Vendor/glad/include
     ${glfw_SOURCE_DIR}/include
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}
+    ${assimp_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/Engine
     ${CMAKE_SOURCE_DIR}/Editor
 )

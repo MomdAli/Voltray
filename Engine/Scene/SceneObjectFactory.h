@@ -59,13 +59,34 @@ public:
      */
     static std::shared_ptr<SceneObject> CreateCylinder(const std::string &name = "Cylinder", float radiusTop = 0.5f,
                                                        float radiusBottom = 0.5f, float height = 1.0f,
-                                                       int radialSegments = 32, int heightSegments = 1);
+                                                       int radialSegments = 32, int heightSegments = 1); /**
+                                                                                                          * @brief Creates a triangle scene object.
+                                                                                                          * @param name Name of the object.
+                                                                                                          * @param size Size of the triangle.
+                                                                                                          * @return Shared pointer to the created scene object.
+                                                                                                          */
+    static std::shared_ptr<SceneObject> CreateTriangle(const std::string &name = "Triangle", float size = 1.0f);
 
     /**
-     * @brief Creates a triangle scene object.
+     * @brief Load a scene object from an external mesh file (OBJ, FBX, etc.).
+     * @param filepath Path to the mesh file.
+     * @param name Name of the object (defaults to filename if empty).
+     * @return Shared pointer to the created scene object, or nullptr if failed.
+     */
+    static std::shared_ptr<SceneObject> LoadFromFile(const std::string &filepath, const std::string &name = "");
+
+    /**
+     * @brief Load all meshes from a file as separate scene objects.
+     * @param filepath Path to the mesh file.
+     * @return Vector of shared pointers to all created scene objects.
+     */
+    static std::vector<std::shared_ptr<SceneObject>> LoadAllFromFile(const std::string &filepath);
+
+    /**
+     * @brief Create a scene object from an existing mesh.
+     * @param mesh Shared pointer to the mesh.
      * @param name Name of the object.
-     * @param size Size of the triangle.
      * @return Shared pointer to the created scene object.
      */
-    static std::shared_ptr<SceneObject> CreateTriangle(const std::string &name = "Triangle", float size = 1.0f);
+    static std::shared_ptr<SceneObject> CreateFromMesh(std::shared_ptr<Mesh> mesh, const std::string &name = "CustomMesh");
 };

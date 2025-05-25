@@ -2,6 +2,7 @@
 #include <imgui.h>
 #include <filesystem>
 #include <memory>
+#include <iostream>
 
 #include "Viewport.h"
 #include "../../Engine/Graphics/Renderer.h"
@@ -103,15 +104,34 @@ namespace Editor::Components
         // Add a sphere to the right
         auto sphere = SceneObjectFactory::CreateSphere("DemoSphere", 0.8f);
         sphere->GetTransform().SetPosition(Vec3(3.0f, 0.0f, 0.0f));
-        m_Scene->AddObject(sphere);
-
-        // Add a plane as ground
+        m_Scene->AddObject(sphere); // Add a plane as ground
         auto ground = SceneObjectFactory::CreatePlane("Ground", 10.0f, 10.0f);
         ground->GetTransform().SetPosition(Vec3(0.0f, -2.0f, 0.0f));
         m_Scene->AddObject(ground);
 
-        // Load shaders
+        // pyramid model loading
         auto root = std::filesystem::current_path();
+        while (!std::filesystem::exists(root / "Models") && root.has_parent_path())
+            root = root.parent_path();
+        auto modelPath = root / "Models" / "pyramid.obj";
+
+        if (std::filesystem::exists(modelPath))
+        {
+            auto pyramid = SceneObjectFactory::LoadFromFile(modelPath.string(), "Testpyramid");
+            if (pyramid)
+            {
+                pyramid->GetTransform().SetPosition(Vec3(-3.0f, 1.0f, 0.0f));
+                m_Scene->AddObject(pyramid);
+                std::cout << "Successfully loaded pyramid.obj!" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "pyramid.obj not found at: " << modelPath << std::endl;
+        }
+
+        // Load shaders
+        root = std::filesystem::current_path();
         while (!std::filesystem::exists(root / "Shaders") && root.has_parent_path())
             root = root.parent_path();
         auto sd = root / "Shaders";
