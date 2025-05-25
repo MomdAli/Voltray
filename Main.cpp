@@ -1,41 +1,67 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include "Editor/EditorApp.h"
-#include <Windows.h>
 #include <fstream>
 #include <filesystem>
 #include <iostream>
 #include <string>
 
-// Crash handler: logs exception info to logs/crash.log and shows a message box
-LONG WINAPI TopLevelExceptionHandler(PEXCEPTION_POINTERS exInfo)
+#ifdef _WIN32
+#include <Windows.h>
+#include <crtdbg.h>
+#endif
+
+// Cross-platform error logging
+void LogError(const std::string &message)
 {
     std::filesystem::path logDir = std::filesystem::current_path() / "logs";
     if (!std::filesystem::exists(logDir))
         std::filesystem::create_directory(logDir);
-    auto logFile = logDir / "crash.log";
-
-    std::string errorMsg = "Crash: Exception code 0x" + std::to_string(exInfo->ExceptionRecord->ExceptionCode) +
-                           " at address " + std::to_string((uintptr_t)exInfo->ExceptionRecord->ExceptionAddress);
+    auto logFile = logDir / "error.log";
 
     std::ofstream ofs(logFile.string(), std::ios::app);
-    ofs << errorMsg << std::endl;
+    ofs << message << std::endl;
     ofs.close();
 
-    // Show error message box
-    MessageBoxA(nullptr, errorMsg.c_str(), "Voltray Crash Detected", MB_OK | MB_ICONERROR);
+    std::cerr << message << std::endl;
+}
 
-    std::cerr << errorMsg << std::endl;
+// Cross-platform message display
+void ShowErrorMessage(const std::string &message, const std::string &title = "Voltray Error")
+{
+#ifdef _WIN32
+    MessageBoxA(nullptr, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+#else
+    // On Linux/macOS, just print to stderr
+    std::cerr << title << ": " << message << std::endl;
+#endif
+}
+
+#ifdef _WIN32
+// Windows-specific crash handler
+LONG WINAPI TopLevelExceptionHandler(PEXCEPTION_POINTERS exInfo)
+{
+    std::string errorMsg = "Crash: Exception code 0x" +
+                           std::to_string(exInfo->ExceptionRecord->ExceptionCode) +
+                           " at address " +
+                           std::to_string((uintptr_t)exInfo->ExceptionRecord->ExceptionAddress);
+
+    LogError(errorMsg);
+    ShowErrorMessage(errorMsg, "Voltray Crash Detected");
+
     return EXCEPTION_EXECUTE_HANDLER;
 }
+#endif
 
 int main()
 {
+#ifdef _WIN32
     SetUnhandledExceptionFilter(TopLevelExceptionHandler);
 // Enable debug runtime error reporting
 #ifdef _MSC_VER
     _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+#endif
 #endif
 
     try
@@ -76,11 +102,11 @@ int main()
     }
     catch (const std::exception &e)
     {
-        MessageBoxA(nullptr, e.what(), "Exception Caught", MB_OK | MB_ICONERROR);
+        ShowErrorMessage(e.what(), "Exception Caught");
     }
     catch (...)
     {
-        MessageBoxA(nullptr, "Unknown exception caught", "Exception Caught", MB_OK | MB_ICONERROR);
+        ShowErrorMessage("Unknown exception caught", "Exception Caught");
     }
     return 0;
 }
