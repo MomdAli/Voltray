@@ -1,14 +1,16 @@
-// Make sure glad/gl.h is included before any OpenGL/GLFW/ImGui headers
 #include <glad/gl.h>
 #include <imgui.h>
 #include <filesystem>
 #include <memory>
+#include <iostream>
 
 #include "Viewport.h"
 #include "../../Engine/Graphics/Renderer.h"
 #include "../../Engine/Graphics/Mesh.h"
 #include "../../Engine/Graphics/Shader.h"
 #include "../../Engine/Graphics/Camera.h"
+#include "../../Engine/Scene/Scene.h"
+#include "../../Engine/Scene/SceneObjectFactory.h"
 #include "../../Engine/Input/Input.h"
 
 namespace Editor::Components
@@ -32,11 +34,9 @@ namespace Editor::Components
         // Set to zero to prevent double-deletion
         m_FBO = 0;
         m_ColorTex = 0;
-        m_DepthRbo = 0;
-
-        // Destroy scene objects in reverse order of creation
+        m_DepthRbo = 0; // Destroy scene objects in reverse order of creation
         // explicitly release unique_ptrs to control destruction order
-        m_Mesh.reset();
+        m_Scene.reset();
         m_Shader.reset();
         m_SkyboxShader.reset();
         m_Renderer.reset();
@@ -91,23 +91,51 @@ namespace Editor::Components
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
-
     void Viewport::initScene()
     {
-        // Create triangle mesh
-        static float verts[] = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.75f, 0.0f};
-        static unsigned int inds[] = {0, 1, 2};
-        m_Mesh = std::make_unique<Mesh>(verts, sizeof(verts), inds, 3);
+        // Create scene and add some demo objects
+        m_Scene = std::make_unique<Scene>();
+
+        // Add a cube at the origin
+        auto cube = SceneObjectFactory::CreateCube("DemoCube", 1.0f);
+        cube->GetTransform().SetPosition(Vec3(0.0f, 0.0f, 0.0f));
+        m_Scene->AddObject(cube);
+
+        // Add a sphere to the right
+        auto sphere = SceneObjectFactory::CreateSphere("DemoSphere", 0.8f);
+        sphere->GetTransform().SetPosition(Vec3(3.0f, 0.0f, 0.0f));
+        m_Scene->AddObject(sphere); // Add a plane as ground
+        auto ground = SceneObjectFactory::CreatePlane("Ground", 10.0f, 10.0f);
+        ground->GetTransform().SetPosition(Vec3(0.0f, -2.0f, 0.0f));
+        m_Scene->AddObject(ground);
+
+        // pyramid model loading
+        auto root = std::filesystem::current_path();
+        while (!std::filesystem::exists(root / "Models") && root.has_parent_path())
+            root = root.parent_path();
+        auto modelPath = root / "Models" / "pyramid.obj";
+
+        if (std::filesystem::exists(modelPath))
+        {
+            auto pyramid = SceneObjectFactory::LoadFromFile(modelPath.string(), "Testpyramid");
+            if (pyramid)
+            {
+                pyramid->GetTransform().SetPosition(Vec3(-3.0f, 1.0f, 0.0f));
+                m_Scene->AddObject(pyramid);
+                std::cout << "Successfully loaded pyramid.obj!" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "pyramid.obj not found at: " << modelPath << std::endl;
+        }
 
         // Load shaders
-        auto root = std::filesystem::current_path();
+        root = std::filesystem::current_path();
         while (!std::filesystem::exists(root / "Shaders") && root.has_parent_path())
             root = root.parent_path();
         auto sd = root / "Shaders";
-        m_Shader = std::make_unique<Shader>((sd / "simple.vert").string(), (sd / "simple.frag").string());
+        m_Shader = std::make_unique<Shader>((sd / "default.vert").string(), (sd / "default.frag").string());
         m_SkyboxShader = std::make_unique<Shader>((sd / "skybox.vert").string(), (sd / "skybox.frag").string());
 
         m_Renderer = std::make_unique<Renderer>();
@@ -136,12 +164,20 @@ namespace Editor::Components
         m_SkyboxShader->SetUniformMat4("u_InverseViewProj", invVP.data);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glDepthMask(GL_TRUE);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT); // Update and render scene
+        if (m_Scene)
+        {
+            m_Scene->Update(0.016f); // Assume ~60 FPS for demo
+        }
 
-        // Mesh
+        // Mesh rendering
         m_Shader->Bind();
         m_Shader->SetUniformMat4("u_ViewProjection", m_Camera->GetViewProjectionMatrix().data);
-        m_Renderer->Draw(*m_Mesh, *m_Shader);
+
+        if (m_Scene)
+        {
+            m_Scene->Render(*m_Renderer, *m_Camera, *m_Shader);
+        }
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
