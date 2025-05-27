@@ -1,9 +1,8 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-
-#include "Math/vec3.h"
-#include "Math/Mat4.h"
+#include "../Math/vec3.h"
+#include "../Math/Mat4.h"
+#include "../Math/Ray.h"
 
 /**
  * @class Camera
@@ -29,15 +28,22 @@ public:
 
     void SetPosition(const Vec3 &position);
     void SetTarget(const Vec3 &target);
+    void SetAspectRatio(float aspect);
 
     Mat4 GetViewMatrix() const;
     Mat4 GetProjectionMatrix() const;
     Mat4 GetViewProjectionMatrix() const;
-
     void Update();
-    void ProcessMouseInput();
+    void ProcessMouseMiddleClick();
     void ProcessScrollInput();
     void Zoom(float delta);
+
+    // Viewport bounds checking for input
+    void SetViewportBounds(float x, float y, float width, float height);
+    bool IsMouseInViewport() const;
+
+    // Ray casting for object selection
+    Ray ScreenToWorldRay(float screenX, float screenY) const;
 
 private:
     void UpdatePositionFromAngles();
@@ -46,7 +52,6 @@ private:
     Vec3 m_Position = Vec3(0.0f, 0.0f, 3.0f);
     Vec3 m_Target = Vec3(0.0f, 0.0f, 0.0f);
     Vec3 m_Up = Vec3(0.0f, 1.0f, 0.0f);
-
     float m_Fov;
     float m_Aspect;
     float m_Near;
@@ -55,4 +60,11 @@ private:
     float m_Pitch = 0.0f;
     float m_MouseSensitivity = 0.1f;
     float m_Distance = 5.0f;
+    bool m_CursorHidden = false;
+
+    // Viewport bounds for input checking
+    float m_ViewportX = 0.0f;
+    float m_ViewportY = 0.0f;
+    float m_ViewportWidth = 0.0f;
+    float m_ViewportHeight = 0.0f;
 };

@@ -26,4 +26,5 @@ namespace Editor::Components
 
         ImGui::End();
     }
+
 }

@@ -1,0 +1,94 @@
+#include "ViewportInput.h"
+#include "../../Engine/Graphics/Camera.h"
+#include "../../Engine/Scene/Scene.h"
+#include "../../Engine/Scene/SceneObject.h"
+#include "../../Engine/Input/Input.h"
+#include "../../Math/Ray.h"
+#include <limits>
+
+namespace Editor::Components
+{
+    void ViewportInput::ProcessInput(::Scene &scene, ::Camera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
+    {
+        // Update global input
+        ::Input::Update();
+
+        // Handle camera controls (middle mouse button is handled globally in Camera class)
+        handleCameraControls();
+
+        // Handle object selection on left mouse click
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+        {
+            handleObjectSelection(scene, camera, viewportPos, viewportSize);
+        }
+    }
+
+    void ViewportInput::handleObjectSelection(::Scene &scene, ::Camera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
+    {
+        ImVec2 mousePos = ImGui::GetMousePos();
+
+        // Check if mouse is within viewport bounds
+        ImVec2 relativePos = getRelativeMousePosition(mousePos, viewportPos);
+        if (relativePos.x < 0 || relativePos.x >= viewportSize.x ||
+            relativePos.y < 0 || relativePos.y >= viewportSize.y)
+        {
+            return;
+        }
+
+        // Create ray from camera through mouse position
+        Ray ray = camera.ScreenToWorldRay(mousePos.x, mousePos.y);
+
+        std::shared_ptr<SceneObject> closestObject = nullptr;
+        float closestDistance = std::numeric_limits<float>::max();
+        const auto &objects = scene.GetObjects();
+
+        // Test ray intersection with all visible objects
+        for (const auto &obj : objects)
+        {
+            if (obj && obj->IsVisible())
+            {
+                Vec3 minBounds, maxBounds;
+                obj->GetWorldBounds(minBounds, maxBounds);
+
+                float intersectionDistance;
+                if (ray.IntersectAABB(minBounds, maxBounds, intersectionDistance))
+                {
+                    if (intersectionDistance < closestDistance && intersectionDistance > 0.0f)
+                    {
+                        closestDistance = intersectionDistance;
+                        closestObject = obj;
+                    }
+                }
+            }
+        }
+
+        // Select the closest object or clear selection
+        if (closestObject)
+        {
+            scene.SelectObject(closestObject);
+        }
+        else
+        {
+            scene.ClearSelection();
+        }
+    }
+
+    void ViewportInput::handleCameraControls()
+    {
+        // Camera controls are now handled globally in the Camera class
+        // The middle mouse button behavior is no longer viewport-constrained when held
+        // No additional viewport-specific camera handling needed here
+    }
+
+    bool ViewportInput::isMouseInViewport(const ImVec2 &mousePos, const ImVec2 &viewportPos, const ImVec2 &viewportSize) const
+    {
+        ImVec2 relativePos = getRelativeMousePosition(mousePos, viewportPos);
+        return (relativePos.x >= 0 && relativePos.x < viewportSize.x &&
+                relativePos.y >= 0 && relativePos.y < viewportSize.y);
+    }
+
+    ImVec2 ViewportInput::getRelativeMousePosition(const ImVec2 &mousePos, const ImVec2 &viewportPos) const
+    {
+        return ImVec2(mousePos.x - viewportPos.x, mousePos.y - viewportPos.y);
+    }
+}

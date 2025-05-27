@@ -92,3 +92,38 @@ void Scene::Render(Renderer &renderer, const Camera &camera, Shader &shader)
         }
     }
 }
+
+void Scene::SelectObject(std::shared_ptr<SceneObject> object)
+{
+    // Clear all selections first
+    ClearSelection();
+
+    // Select the specified object if it exists in the scene
+    if (object && std::find(m_Objects.begin(), m_Objects.end(), object) != m_Objects.end())
+    {
+        object->SetSelected(true);
+    }
+}
+
+void Scene::ClearSelection()
+{
+    for (auto &obj : m_Objects)
+    {
+        if (obj)
+        {
+            obj->SetSelected(false);
+        }
+    }
+}
+
+std::shared_ptr<SceneObject> Scene::GetSelectedObject() const
+{
+    for (auto &obj : m_Objects)
+    {
+        if (obj && obj->IsSelected())
+        {
+            return obj;
+        }
+    }
+    return nullptr;
+}

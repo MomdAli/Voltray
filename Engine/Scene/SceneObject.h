@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Math/Transform.h"
+#include "../Math/Transform.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
 #include <memory>
@@ -46,15 +46,23 @@ public:
     // Properties
     const std::string &GetName() const { return m_Name; }
     void SetName(const std::string &name) { m_Name = name; }
-
     bool IsVisible() const { return m_Visible; }
     void SetVisible(bool visible) { m_Visible = visible; }
+    bool IsSelected() const { return m_Selected; }
+    void SetSelected(bool selected) { m_Selected = selected; }
 
     /**
      * @brief Gets the model matrix for rendering.
      * @return The transformation matrix.
      */
     Mat4 GetModelMatrix() const { return m_Transform.GetMatrix(); }
+
+    /**
+     * @brief Gets the axis-aligned bounding box in world space.
+     * @param minBounds Output minimum bounds of the bounding box.
+     * @param maxBounds Output maximum bounds of the bounding box.
+     */
+    void GetWorldBounds(Vec3 &minBounds, Vec3 &maxBounds) const;
 
     /**
      * @brief Virtual update method - can be overridden for custom behavior.
@@ -72,4 +80,5 @@ protected:
     Transform m_Transform;
     std::shared_ptr<Mesh> m_Mesh;
     bool m_Visible = true;
+    bool m_Selected = false;
 };

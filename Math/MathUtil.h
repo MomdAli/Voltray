@@ -1,4 +1,3 @@
-// filepath: Engine/Math/MathUtil.h
 #pragma once
 
 namespace MathUtil

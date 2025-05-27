@@ -1,6 +1,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <stdexcept>
 #include <glad/gl.h>
 
 #include "Shader.h"
@@ -8,8 +9,22 @@
 Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath)
 {
     std::string vertexSource = LoadShaderSource(vertexPath);
+    if (vertexSource.empty())
+    {
+        throw std::runtime_error("Failed to load vertex shader: " + vertexPath);
+    }
+
     std::string fragmentSource = LoadShaderSource(fragmentPath);
+    if (fragmentSource.empty())
+    {
+        throw std::runtime_error("Failed to load fragment shader: " + fragmentPath);
+    }
+
     m_RendererID = CreateShaderProgram(vertexSource, fragmentSource);
+    if (m_RendererID == 0)
+    {
+        throw std::runtime_error("Failed to create shader program from: " + vertexPath + " and " + fragmentPath);
+    }
 }
 
 Shader::~Shader()
@@ -43,6 +58,12 @@ std::string Shader::LoadShaderSource(const std::string &filepath)
 
 unsigned int Shader::CompileShader(unsigned int type, const std::string &source)
 {
+    if (source.empty())
+    {
+        std::cerr << "Shader source is empty" << std::endl;
+        return 0;
+    }
+
     unsigned int id = glCreateShader(type);
     const char *src = source.c_str();
     glShaderSource(id, 1, &src, nullptr);
@@ -56,6 +77,8 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string &source)
         glGetShaderInfoLog(id, sizeof(infoLog), nullptr, infoLog);
         std::cerr << "Shader compilation error:\n"
                   << infoLog << std::endl;
+        glDeleteShader(id);
+        return 0;
     }
 
     return id;
@@ -64,7 +87,19 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string &source)
 unsigned int Shader::CreateShaderProgram(const std::string &vertexSource, const std::string &fragmentSource)
 {
     unsigned int vertex = CompileShader(GL_VERTEX_SHADER, vertexSource);
+    if (vertex == 0)
+    {
+        std::cerr << "Failed to compile vertex shader" << std::endl;
+        return 0;
+    }
+
     unsigned int fragment = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
+    if (fragment == 0)
+    {
+        std::cerr << "Failed to compile fragment shader" << std::endl;
+        glDeleteShader(vertex);
+        return 0;
+    }
 
     unsigned int program = glCreateProgram();
     glAttachShader(program, vertex);
@@ -79,6 +114,10 @@ unsigned int Shader::CreateShaderProgram(const std::string &vertexSource, const 
         glGetProgramInfoLog(program, sizeof(infoLog), nullptr, infoLog);
         std::cerr << "Shader linking error:\n"
                   << infoLog << std::endl;
+        glDeleteProgram(program);
+        glDeleteShader(vertex);
+        glDeleteShader(fragment);
+        return 0;
     }
 
     glDeleteShader(vertex);
@@ -105,4 +144,14 @@ int Shader::GetUniformLocation(const std::string &name) const
 void Shader::SetUniformMat4(const std::string &name, const float *matrix) const
 {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix);
+}
+
+void Shader::SetUniform3f(const std::string &name, float x, float y, float z) const
+{
+    glUniform3f(GetUniformLocation(name), x, y, z);
+}
+
+void Shader::SetUniform1f(const std::string &name, float value) const
+{
+    glUniform1f(GetUniformLocation(name), value);
 }

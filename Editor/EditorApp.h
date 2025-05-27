@@ -1,11 +1,14 @@
 #pragma once
+
 #include <memory>
 #include <GLFW/glfw3.h>
+
 #include "Components/Toolbar.h"
-#include "Components/Viewport.h"
+#include "Components/Viewport/Viewport.h"
 #include "Components/Inspector.h"
 #include "Components/Assets.h"
 #include "Components/Console.h"
+#include "Components/Settings.h"
 #include "Components/Dockspace.h"
 
 /**
@@ -61,12 +64,30 @@ namespace Editor
          */
         static EditorApp *Get();
 
+        /**
+         * @brief Get panel visibility flags for menu toggles
+         */
+        bool &GetViewportVisible() { return m_ViewportVisible; }
+        bool &GetInspectorVisible() { return m_InspectorVisible; }
+        bool &GetAssetsVisible() { return m_AssetsVisible; }
+        bool &GetConsoleVisible() { return m_ConsoleVisible; }
+        bool &GetSettingsVisible() { return m_SettingsVisible; }
+
     private:
         std::unique_ptr<Components::Toolbar> m_Toolbar;
         std::unique_ptr<Components::Viewport> m_Viewport;
         std::unique_ptr<Components::Inspector> m_Inspector;
         std::unique_ptr<Components::Assets> m_Assets;
         std::unique_ptr<Components::Console> m_Console;
+        std::unique_ptr<Components::Settings> m_Settings;
+
+        // Panel visibility flags
+        bool m_ViewportVisible = true;
+        bool m_InspectorVisible = true;
+        bool m_AssetsVisible = true;
+        bool m_ConsoleVisible = true;
+        bool m_SettingsVisible = true;
+
         static EditorApp *s_Instance;
     };
 }

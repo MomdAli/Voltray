@@ -87,13 +87,28 @@ public:
      * @param camera Reference to the camera.
      * @param shader Reference to the shader.
      */
-    void Render(Renderer &renderer, const Camera &camera, Shader &shader);
+    void Render(Renderer &renderer, const Camera &camera, Shader &shader); /**
+                                                                            * @brief Gets the number of objects in the scene.
+                                                                            * @return Number of objects.
+                                                                            */
+    size_t GetObjectCount() const { return m_Objects.size(); }
 
     /**
-     * @brief Gets the number of objects in the scene.
-     * @return Number of objects.
+     * @brief Selects an object by pointer and clears other selections.
+     * @param object Shared pointer to the object to select.
      */
-    size_t GetObjectCount() const { return m_Objects.size(); }
+    void SelectObject(std::shared_ptr<SceneObject> object);
+
+    /**
+     * @brief Clears all object selections.
+     */
+    void ClearSelection();
+
+    /**
+     * @brief Gets the currently selected object.
+     * @return Shared pointer to selected object, or nullptr if none.
+     */
+    std::shared_ptr<SceneObject> GetSelectedObject() const;
 
 private:
     std::vector<std::shared_ptr<SceneObject>> m_Objects;

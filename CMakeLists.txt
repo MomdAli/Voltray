@@ -71,12 +71,16 @@ if(TARGET assimp)
     endif()
 endif()
 
-# Gather all source files from Engine and Editor (recursively, all .cpp and .h)
+# Gather all source files from Engine, Editor, Math, and Utils (recursively, all .cpp and .h)
 file(GLOB_RECURSE VOLTRAY_SRC CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/Engine/*.cpp"
     "${CMAKE_SOURCE_DIR}/Engine/*.h"
     "${CMAKE_SOURCE_DIR}/Editor/*.cpp"
     "${CMAKE_SOURCE_DIR}/Editor/*.h"
+    "${CMAKE_SOURCE_DIR}/Math/*.cpp"
+    "${CMAKE_SOURCE_DIR}/Math/*.h"
+    "${CMAKE_SOURCE_DIR}/Utils/*.cpp"
+    "${CMAKE_SOURCE_DIR}/Utils/*.h"
 )
 
 # Add Main.cpp from project root
@@ -103,18 +107,20 @@ find_package(OpenGL REQUIRED)
 # Link GLFW and OpenGL to the Voltray executable
 target_link_libraries(Voltray PRIVATE glfw OpenGL::GL assimp)
 
-# Collect all header directories from Engine and Editor recursively
+# Collect all header directories from Engine, Editor, Math, and Utils recursively
 file(GLOB_RECURSE ENGINE_HEADERS "${CMAKE_SOURCE_DIR}/Engine/*.h")
 file(GLOB_RECURSE EDITOR_HEADERS "${CMAKE_SOURCE_DIR}/Editor/*.h")
+file(GLOB_RECURSE MATH_HEADERS "${CMAKE_SOURCE_DIR}/Math/*.h")
+file(GLOB_RECURSE UTILS_HEADERS "${CMAKE_SOURCE_DIR}/Utils/*.h")
 
 set(ALL_HEADER_DIRS "")
-foreach(header ${ENGINE_HEADERS} ${EDITOR_HEADERS})
+foreach(header ${ENGINE_HEADERS} ${EDITOR_HEADERS} ${MATH_HEADERS} ${UTILS_HEADERS})
     get_filename_component(dir ${header} DIRECTORY)
     list(APPEND ALL_HEADER_DIRS ${dir})
 endforeach()
 list(REMOVE_DUPLICATES ALL_HEADER_DIRS)
 
-# Add ImGui, glad, glfw, assimp, and root Engine/Editor include dirs
+# Add ImGui, glad, glfw, assimp, and root directories
 list(APPEND ALL_HEADER_DIRS
     ${CMAKE_SOURCE_DIR}/Vendor/glad/include
     ${glfw_SOURCE_DIR}/include
@@ -123,6 +129,8 @@ list(APPEND ALL_HEADER_DIRS
     ${assimp_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/Engine
     ${CMAKE_SOURCE_DIR}/Editor
+    ${CMAKE_SOURCE_DIR}/Math
+    ${CMAKE_SOURCE_DIR}/Utils
 )
 
 target_include_directories(Voltray PRIVATE ${ALL_HEADER_DIRS})

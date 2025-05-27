@@ -3,6 +3,7 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "../Math/vec3.h"
 #include <vector>
 
 /**
@@ -38,18 +39,27 @@ public:
      * if the underlying VertexArray, VertexBuffer, and IndexBuffer
      * classes manage their own resource deallocation.
      */
-    ~Mesh();
+    ~Mesh(); /**
+              * @brief Renders the mesh.
+              *
+              * This method binds the associated Vertex Array Object and issues a draw call
+              * using the Index Buffer Object.
+              */
+    void Draw() const;
 
     /**
-     * @brief Renders the mesh.
-     *
-     * This method binds the associated Vertex Array Object and issues a draw call
-     * using the Index Buffer Object.
+     * @brief Gets the axis-aligned bounding box of the mesh.
+     * @param minBounds Output minimum bounds of the mesh.
+     * @param maxBounds Output maximum bounds of the mesh.
      */
-    void Draw() const;
+    void GetBounds(Vec3 &minBounds, Vec3 &maxBounds) const;
 
 private:
     VertexArray m_VAO;  ///< Vertex Array Object managing the vertex attribute configurations.
     VertexBuffer m_VBO; ///< Vertex Buffer Object storing the vertex data.
     IndexBuffer m_IBO;  ///< Index Buffer Object storing the index data.
+
+    std::vector<float> m_Vertices;           ///< Copy of vertex data for bounds calculation
+    mutable Vec3 m_MinBounds, m_MaxBounds;   ///< Cached bounding box
+    mutable bool m_BoundsCalculated = false; ///< Whether bounds have been calculated
 };

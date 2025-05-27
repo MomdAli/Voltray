@@ -1,3 +1,4 @@
+#include <glad/gl.h>
 #include <cmath>
 #include <iostream>
 #include <GLFW/glfw3.h>
@@ -5,13 +6,14 @@
 #include "Config/EngineSettings.h"
 #include "Graphics/Camera.h"
 #include "Input/Input.h"
-#include "Math/MathUtil.h"
+#include "../Math/MathUtil.h"
+#include "../Math/Ray.h"
 
 #define DEG2RAD 0.01745329251994329576923690768489f // pi / 180.0f
 #define RAD2DEG 57.295779513082320876798154814105f  // 180.0f / pi
 
 Camera::Camera(float fovDeg, float aspect, float nearPlane, float farPlane)
-    : m_Fov(fovDeg), m_Aspect(aspect), m_Near(nearPlane), m_Far(farPlane)
+    : m_Fov(fovDeg), m_Aspect(aspect), m_Near(nearPlane), m_Far(farPlane), m_CursorHidden(false)
 {
     m_Target = Vec3(0.0f, 0.0f, 0.0f);
     m_Distance = 3.0f;
@@ -34,36 +36,48 @@ void Camera::SetTarget(const Vec3 &target)
     UpdateAnglesFromPosition();
 }
 
+void Camera::SetAspectRatio(float aspect)
+{
+    m_Aspect = aspect;
+}
+
 void Camera::Update()
 {
-    ProcessMouseInput();
+    ProcessMouseMiddleClick();
     ProcessScrollInput();
     UpdatePositionFromAngles();
 }
 
-void Camera::ProcessMouseInput()
+void Camera::ProcessMouseMiddleClick()
 {
     bool mmb = Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE);
     static bool wasMmb = false;
-    static bool cursorHidden = false;
-    if (mmb && !wasMmb)
+
+    if (mmb && !wasMmb && IsMouseInViewport())
     {
         // Hide cursor and enable unlimited movement
         glfwSetInputMode(Input::s_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        cursorHidden = true;
+        m_CursorHidden = true;
         Input::ResetMouseDelta(); // Optionally reset delta to avoid jump
     }
-    else if (!mmb && wasMmb && cursorHidden)
+    else if (!mmb && wasMmb && m_CursorHidden)
     {
         // Show cursor again
         glfwSetInputMode(Input::s_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        cursorHidden = false;
+        m_CursorHidden = false;
         Input::ResetMouseDelta();
     }
+
+    // Update the previous state
     wasMmb = mmb;
+
+    // Only process camera movement if middle mouse is pressed AND mouse started in viewport
     if (!mmb)
         return;
 
+    // Check if mouse is in viewport OR if we're already in camera control mode (cursor hidden)
+    if (!m_CursorHidden && !IsMouseInViewport())
+        return;
     float dx = static_cast<float>(Input::GetMouseDeltaX());
     float dy = static_cast<float>(Input::GetMouseDeltaY());
     // Clamp mouse delta to prevent excessive camera movement on fast mouse motion
@@ -111,10 +125,8 @@ void Camera::ProcessScrollInput()
 {
     // Assume Input::GetScrollDeltaY() returns the vertical scroll offset since last frame
     float scrollY = static_cast<float>(Input::GetScrollDeltaY());
-    if (scrollY != 0.0f)
-    {
+    if (scrollY != 0.0f && (IsMouseInViewport() || m_CursorHidden))
         Zoom(scrollY);
-    }
 }
 
 void Camera::Zoom(float delta)
@@ -169,4 +181,62 @@ Mat4 Camera::GetProjectionMatrix() const
 Mat4 Camera::GetViewProjectionMatrix() const
 {
     return GetViewMatrix() * GetProjectionMatrix();
+}
+
+void Camera::SetViewportBounds(float x, float y, float width, float height)
+{
+    m_ViewportX = x;
+    m_ViewportY = y;
+    m_ViewportWidth = width;
+    m_ViewportHeight = height;
+}
+
+bool Camera::IsMouseInViewport() const
+{
+    if (!Input::s_Window)
+        return false;
+
+    double mouseX, mouseY;
+    glfwGetCursorPos(Input::s_Window, &mouseX, &mouseY);
+
+    // Check if mouse is within viewport bounds
+    return (mouseX >= m_ViewportX &&
+            mouseX <= m_ViewportX + m_ViewportWidth &&
+            mouseY >= m_ViewportY &&
+            mouseY <= m_ViewportY + m_ViewportHeight);
+}
+
+Ray Camera::ScreenToWorldRay(float screenX, float screenY) const
+{
+    // Convert screen coordinates to normalized device coordinates (NDC)
+    // Screen coordinates are relative to the viewport
+    float x = (2.0f * (screenX - m_ViewportX)) / m_ViewportWidth - 1.0f;
+    float y = 1.0f - (2.0f * (screenY - m_ViewportY)) / m_ViewportHeight; // Flip Y axis
+
+    // Create ray direction in normalized device coordinates
+    // For perspective projection, we need to handle the perspective correctly
+    Mat4 invProjection = GetProjectionMatrix().Inverse();
+    Mat4 invView = GetViewMatrix().Inverse();
+
+    // Create points in clip space (w=1 for proper perspective division)
+    Vec3 rayNDC = Vec3(x, y, 1.0f); // Point on far plane in NDC
+
+    // Transform to view space (eye space)
+    // For NDC to view space, we need to multiply by inverse projection
+    // The perspective projection formula is: NDC = view * projection
+    // So: view = NDC * inverse(projection)
+
+    // Convert NDC point to view space
+    float tanHalfFOV = tan((m_Fov * 3.14159f / 180.0f) * 0.5f);
+    float viewX = x * tanHalfFOV * m_Aspect;
+    float viewY = y * tanHalfFOV;
+    Vec3 rayViewSpace = Vec3(viewX, viewY, -1.0f); // -1 because we look down negative Z in view space
+
+    // Transform from view space to world space
+    Vec3 rayWorldDirection = invView.MultiplyVec3(rayViewSpace);
+
+    // The ray direction is from camera position to the world point
+    Vec3 rayDirection = (rayWorldDirection - invView.MultiplyVec3(Vec3(0, 0, 0))).Normalize();
+
+    return Ray(m_Position, rayDirection);
 }
