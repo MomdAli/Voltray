@@ -43,6 +43,15 @@ Vec3 Mat4::MultiplyVec3(const Vec3 &v) const
     return Vec3(x, y, z);
 }
 
+Vec4 Mat4::MultiplyVec4(const Vec4 &v) const
+{
+    float x = v.x * data[0] + v.y * data[4] + v.z * data[8] + v.w * data[12];
+    float y = v.x * data[1] + v.y * data[5] + v.z * data[9] + v.w * data[13];
+    float z = v.x * data[2] + v.y * data[6] + v.z * data[10] + v.w * data[14];
+    float w = v.x * data[3] + v.y * data[7] + v.z * data[11] + v.w * data[15];
+    return Vec4(x, y, z, w);
+}
+
 Mat4 Mat4::Translate(const Vec3 &t)
 {
     Mat4 result = Identity();
@@ -58,6 +67,34 @@ Mat4 Mat4::Scale(const Vec3 &s)
     result.data[0] = s.x;
     result.data[5] = s.y;
     result.data[10] = s.z;
+    return result;
+}
+
+Mat4 Mat4::RotateX(float angleRad)
+{
+    Mat4 result = Identity();
+    float cosAngle = std::cos(angleRad);
+    float sinAngle = std::sin(angleRad);
+
+    result.data[5] = cosAngle;  // [1][1]
+    result.data[6] = -sinAngle; // [1][2]
+    result.data[9] = sinAngle;  // [2][1]
+    result.data[10] = cosAngle; // [2][2]
+
+    return result;
+}
+
+Mat4 Mat4::RotateY(float angleRad)
+{
+    Mat4 result = Identity();
+    float cosAngle = std::cos(angleRad);
+    float sinAngle = std::sin(angleRad);
+
+    result.data[0] = cosAngle;  // [0][0]
+    result.data[2] = sinAngle;  // [0][2]
+    result.data[8] = -sinAngle; // [2][0]
+    result.data[10] = cosAngle; // [2][2]
+
     return result;
 }
 
@@ -113,6 +150,22 @@ Mat4 Mat4::Perspective(float fovRadians, float aspect, float near, float far)
     result.data[10] = -(far + near) / (far - near);
     result.data[11] = -1.0f;
     result.data[14] = -(2.0f * far * near) / (far - near);
+
+    return result;
+}
+
+Mat4 Mat4::Orthographic(float left, float right, float bottom, float top, float near, float far)
+{
+    Mat4 result;
+    std::memset(result.data, 0, sizeof(result.data));
+
+    result.data[0] = 2.0f / (right - left);
+    result.data[5] = 2.0f / (top - bottom);
+    result.data[10] = -2.0f / (far - near);
+    result.data[12] = -(right + left) / (right - left);
+    result.data[13] = -(top + bottom) / (top - bottom);
+    result.data[14] = -(far + near) / (far - near);
+    result.data[15] = 1.0f;
 
     return result;
 }

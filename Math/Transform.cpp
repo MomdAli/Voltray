@@ -2,20 +2,18 @@
 #include "MathUtil.h"
 #include <cmath>
 
-#define DEG2RAD 0.01745329251994329576923690768489f // pi / 180.0f
-
 Transform::Transform()
-    : m_Position(0.0f, 0.0f, 0.0f), m_Rotation(0.0f, 0.0f, 0.0f), m_Scale(1.0f, 1.0f, 1.0f)
+    : m_Position(0.0f, 0.0f, 0.0f), m_Rotation(0.0f, 0.0f, 0.0f), m_Scale(1.0f, 1.0f, 1.0f), m_Pivot(0.0f, 0.0f, 0.0f), m_MeshCenter(0.0f, 0.0f, 0.0f)
 {
 }
 
 Transform::Transform(const Vec3 &position)
-    : m_Position(position), m_Rotation(0.0f, 0.0f, 0.0f), m_Scale(1.0f, 1.0f, 1.0f)
+    : m_Position(position), m_Rotation(0.0f, 0.0f, 0.0f), m_Scale(1.0f, 1.0f, 1.0f), m_Pivot(0.0f, 0.0f, 0.0f), m_MeshCenter(0.0f, 0.0f, 0.0f)
 {
 }
 
 Transform::Transform(const Vec3 &position, const Vec3 &rotation, const Vec3 &scale)
-    : m_Position(position), m_Rotation(rotation), m_Scale(scale)
+    : m_Position(position), m_Rotation(rotation), m_Scale(scale), m_Pivot(0.0f, 0.0f, 0.0f), m_MeshCenter(0.0f, 0.0f, 0.0f)
 {
 }
 
@@ -40,6 +38,25 @@ void Transform::SetScale(const Vec3 &scale)
 void Transform::SetScale(float uniformScale)
 {
     m_Scale = Vec3(uniformScale, uniformScale, uniformScale);
+    InvalidateMatrix();
+}
+
+void Transform::SetPivot(const Vec3 &pivot)
+{
+    m_Pivot = pivot;
+    InvalidateMatrix();
+}
+
+void Transform::SetMeshCenter(const Vec3 &meshCenter)
+{
+    m_MeshCenter = meshCenter;
+    InvalidateMatrix();
+}
+
+void Transform::SetRelativePivot(const Vec3 &meshCenter, const Vec3 &relativePivot)
+{
+    m_MeshCenter = meshCenter;
+    m_Pivot = relativePivot;
     InvalidateMatrix();
 }
 
@@ -83,12 +100,20 @@ Mat4 Transform::GetMatrix() const
 
 Mat4 Transform::GetInverseMatrix() const
 {
-    // For a TRS matrix, the inverse is: S^-1 * R^-1 * T^-1
-    Mat4 invScale = Mat4::Scale(Vec3(1.0f / m_Scale.x, 1.0f / m_Scale.y, 1.0f / m_Scale.z));
-    Mat4 invRotation = Mat4::RotateZ(-m_Rotation.z * DEG2RAD); // Simple Z rotation for now
     Mat4 invTranslation = Mat4::Translate(Vec3(-m_Position.x, -m_Position.y, -m_Position.z));
 
-    return invScale * invRotation * invTranslation;
+    Vec3 absolutePivot = m_MeshCenter + m_Pivot;
+    Mat4 translateToPivot = Mat4::Translate(absolutePivot);
+    Mat4 translateFromPivot = Mat4::Translate(Vec3(-absolutePivot.x, -absolutePivot.y, -absolutePivot.z));
+
+    Mat4 invRotationX = Mat4::RotateX(-m_Rotation.x * DEG2RAD);
+    Mat4 invRotationY = Mat4::RotateY(-m_Rotation.y * DEG2RAD);
+    Mat4 invRotationZ = Mat4::RotateZ(-m_Rotation.z * DEG2RAD);
+    Mat4 invRotation = invRotationX * invRotationY * invRotationZ;
+
+    Mat4 invScale = Mat4::Scale(Vec3(1.0f / m_Scale.x, 1.0f / m_Scale.y, 1.0f / m_Scale.z));
+
+    return translateToPivot * invScale * invRotation * translateFromPivot * invTranslation;
 }
 
 void Transform::Reset()
@@ -96,15 +121,25 @@ void Transform::Reset()
     m_Position = Vec3(0.0f, 0.0f, 0.0f);
     m_Rotation = Vec3(0.0f, 0.0f, 0.0f);
     m_Scale = Vec3(1.0f, 1.0f, 1.0f);
+    m_Pivot = Vec3(0.0f, 0.0f, 0.0f);
+    m_MeshCenter = Vec3(0.0f, 0.0f, 0.0f);
     InvalidateMatrix();
 }
 
 void Transform::UpdateMatrix() const
 {
-    // Create TRS matrix: Translation * Rotation * Scale
-    Mat4 translation = Mat4::Translate(m_Position);
-    Mat4 rotation = Mat4::RotateZ(m_Rotation.z * DEG2RAD); // For now, just Z rotation
     Mat4 scale = Mat4::Scale(m_Scale);
 
-    m_CachedMatrix = translation * rotation * scale;
+    Mat4 rotationX = Mat4::RotateX(m_Rotation.x * DEG2RAD);
+    Mat4 rotationY = Mat4::RotateY(m_Rotation.y * DEG2RAD);
+    Mat4 rotationZ = Mat4::RotateZ(m_Rotation.z * DEG2RAD);
+    Mat4 rotation = rotationZ * rotationY * rotationX;
+
+    Vec3 absolutePivot = m_MeshCenter + m_Pivot;
+    Mat4 translateFromPivot = Mat4::Translate(Vec3(-absolutePivot.x, -absolutePivot.y, -absolutePivot.z));
+    Mat4 translateToPivot = Mat4::Translate(absolutePivot);
+
+    Mat4 translation = Mat4::Translate(m_Position);
+
+    m_CachedMatrix = translation * translateToPivot * rotation * scale * translateFromPivot;
 }

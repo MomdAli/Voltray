@@ -1,20 +1,32 @@
 #include "ViewportInput.h"
-#include "../../Engine/Graphics/Camera.h"
+#include "../../Engine/Graphics/Camera/BaseCamera.h"
 #include "../../Engine/Scene/Scene.h"
 #include "../../Engine/Scene/SceneObject.h"
 #include "../../Engine/Input/Input.h"
 #include "../../Math/Ray.h"
+#include <GLFW/glfw3.h>
 #include <limits>
 
 namespace Editor::Components
 {
-    void ViewportInput::ProcessInput(::Scene &scene, ::Camera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
+    void ViewportInput::ProcessInput(::Scene &scene, ::BaseCamera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
     {
         // Update global input
         ::Input::Update();
 
         // Handle camera controls (middle mouse button is handled globally in Camera class)
         handleCameraControls();
+
+        // Handle F key for focus on selected object (smooth animation)
+        if (ImGui::IsItemHovered() && ::Input::IsKeyPressed(GLFW_KEY_F))
+        {
+            auto selectedObject = scene.GetSelectedObject();
+            if (selectedObject)
+            {
+                Vec3 objectPosition = selectedObject->GetTransform().GetPosition();
+                camera.FocusOnObjectSmooth(objectPosition, 0.8f);
+            }
+        }
 
         // Handle object selection on left mouse click
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
@@ -23,7 +35,7 @@ namespace Editor::Components
         }
     }
 
-    void ViewportInput::handleObjectSelection(::Scene &scene, ::Camera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
+    void ViewportInput::handleObjectSelection(::Scene &scene, ::BaseCamera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
     {
         ImVec2 mousePos = ImGui::GetMousePos();
 

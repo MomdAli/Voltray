@@ -39,20 +39,24 @@ public:
      * if the underlying VertexArray, VertexBuffer, and IndexBuffer
      * classes manage their own resource deallocation.
      */
-    ~Mesh(); /**
-              * @brief Renders the mesh.
-              *
-              * This method binds the associated Vertex Array Object and issues a draw call
-              * using the Index Buffer Object.
-              */
-    void Draw() const;
+    ~Mesh();           /**
+                        * @brief Renders the mesh.
+                        *
+                        * This method binds the associated Vertex Array Object and issues a draw call
+                        * using the Index Buffer Object.
+                        */
+    void Draw() const; /**
+                        * @brief Gets the axis-aligned bounding box of the mesh.
+                        * @param minBounds Output minimum bounds of the mesh.
+                        * @param maxBounds Output maximum bounds of the mesh.
+                        */
+    void GetBounds(Vec3 &minBounds, Vec3 &maxBounds) const;
 
     /**
-     * @brief Gets the axis-aligned bounding box of the mesh.
-     * @param minBounds Output minimum bounds of the mesh.
-     * @param maxBounds Output maximum bounds of the mesh.
+     * @brief Gets the center point of the mesh bounds.
+     * @return The center point of the mesh.
      */
-    void GetBounds(Vec3 &minBounds, Vec3 &maxBounds) const;
+    Vec3 GetCenter() const;
 
 private:
     VertexArray m_VAO;  ///< Vertex Array Object managing the vertex attribute configurations.

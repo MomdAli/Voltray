@@ -2,7 +2,7 @@
 
 #include "SceneObject.h"
 #include "Graphics/Renderer.h"
-#include "Graphics/Camera.h"
+#include "Graphics/Camera/BaseCamera.h"
 #include <vector>
 #include <memory>
 #include <string>
@@ -87,10 +87,10 @@ public:
      * @param camera Reference to the camera.
      * @param shader Reference to the shader.
      */
-    void Render(Renderer &renderer, const Camera &camera, Shader &shader); /**
-                                                                            * @brief Gets the number of objects in the scene.
-                                                                            * @return Number of objects.
-                                                                            */
+    void Render(Renderer &renderer, const BaseCamera &camera, Shader &shader); /**
+                                                                                * @brief Gets the number of objects in the scene.
+                                                                                * @return Number of objects.
+                                                                                */
     size_t GetObjectCount() const { return m_Objects.size(); }
 
     /**

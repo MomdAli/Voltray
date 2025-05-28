@@ -27,6 +27,12 @@ namespace Editor::Components
 
         void Draw() override;
 
+        /**
+         * @brief Get the viewport scene component
+         * @return Reference to the ViewportScene
+         */
+        ViewportScene &GetScene() { return m_Scene; }
+
     private:
         void initialize();
         bool isInitialized() const;

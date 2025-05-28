@@ -96,3 +96,10 @@ void Mesh::GetBounds(Vec3 &minBounds, Vec3 &maxBounds) const
     minBounds = m_MinBounds;
     maxBounds = m_MaxBounds;
 }
+
+Vec3 Mesh::GetCenter() const
+{
+    Vec3 minBounds, maxBounds;
+    GetBounds(minBounds, maxBounds);
+    return (minBounds + maxBounds) * 0.5f;
+}

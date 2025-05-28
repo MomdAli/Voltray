@@ -77,8 +77,12 @@ void Scene::Update(float deltaTime)
     }
 }
 
-void Scene::Render(Renderer &renderer, const Camera &camera, Shader &shader)
+void Scene::Render(Renderer &renderer, const BaseCamera &camera, Shader &shader)
 {
+    // Set the camera view-projection matrix for all objects
+    shader.Bind();
+    shader.SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix().data);
+
     for (auto &object : m_Objects)
     {
         if (object && object->IsVisible() && object->GetMesh())
@@ -88,6 +92,8 @@ void Scene::Render(Renderer &renderer, const Camera &camera, Shader &shader)
 
             // Get the model matrix and render the object
             Mat4 modelMatrix = object->GetModelMatrix();
+            shader.SetUniformMat4("u_Model", modelMatrix.data);
+
             renderer.Draw(*object->GetMesh(), shader, modelMatrix);
         }
     }

@@ -39,10 +39,8 @@ namespace Editor::Components
         ImGui::SameLine();
         ImGui::Checkbox("Timestamps", &m_showTimestamps);
 
-        ImGui::Separator();
-
-        // Filter checkboxes
-        ImGui::Text("Filters:");
+        ImGui::Separator(); // Filter checkboxes
+        ImGui::TextWrapped("Filters:");
         ImGui::SameLine();
         ImGui::Checkbox("Info", &m_showInfo);
         ImGui::SameLine();

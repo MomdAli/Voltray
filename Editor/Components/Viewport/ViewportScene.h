@@ -1,10 +1,11 @@
 #pragma once
 
 #include <memory>
+#include "../../../Engine/Graphics/Camera/BaseCamera.h"
 
 // Forward declarations
 class Scene;
-class Camera;
+class BaseCamera;
 class Renderer;
 
 namespace Editor::Components
@@ -33,7 +34,7 @@ namespace Editor::Components
          * @brief Get the camera instance
          * @return Reference to the camera
          */
-        ::Camera &GetCamera() { return *m_Camera; }
+        ::BaseCamera &GetCamera() { return *m_Camera; }
 
         /**
          * @brief Get the renderer instance
@@ -63,12 +64,31 @@ namespace Editor::Components
          */
         void SetCameraViewportBounds(float x, float y, float width, float height);
 
+        /**
+         * @brief Switch to a different camera type
+         * @param type The camera type to switch to
+         */
+        void SwitchCamera(CameraType type);
+
+        /**
+         * @brief Update camera settings
+         * @param fov Field of view for perspective cameras
+         * @param orthoSize Orthographic size for parallel cameras
+         */
+        void UpdateCameraSettings(float fov, float orthoSize);
+
+        /**
+         * @brief Get current camera type
+         * @return Current camera type
+         */
+        CameraType GetCurrentCameraType() const;
+
     private:
         void createDemoScene();
         void loadDemoModel();
 
         std::unique_ptr<::Scene> m_Scene;
-        std::unique_ptr<::Camera> m_Camera;
+        std::unique_ptr<::BaseCamera> m_Camera;
         std::unique_ptr<::Renderer> m_Renderer;
     };
 }

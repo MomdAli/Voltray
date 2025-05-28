@@ -1,5 +1,10 @@
 #pragma once
 
+#define M_PI 3.141592653589793238467932384626433f   // Pi constant
+#define M_PI_2 1.570796326794896619231321691639751f // Pi / 2
+#define DEG2RAD 0.01745329251994329576923690768489f // Pi / 180.0f
+#define RAD2DEG 57.295779513082320876798154814105f  // 180.0f / Pi
+
 namespace MathUtil
 {
     // Clamp a value between min and max

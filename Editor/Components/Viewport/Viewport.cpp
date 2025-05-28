@@ -27,7 +27,7 @@ namespace Editor::Components
     {
         if (!isInitialized())
         {
-            ImGui::Text("Viewport initialization failed");
+            ImGui::TextWrapped("Viewport initialization failed");
             return;
         }
 

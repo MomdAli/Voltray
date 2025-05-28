@@ -1,7 +1,7 @@
 #include "ViewportRenderer.h"
 #include "Console.h"
 #include "../../Engine/Graphics/Shader.h"
-#include "../../Engine/Graphics/Camera.h"
+#include "../../Engine/Graphics/Camera/BaseCamera.h"
 #include "../../Engine/Scene/Scene.h"
 #include "../../Engine/Scene/SceneObject.h"
 #include "../../Engine/Graphics/Renderer.h"
@@ -72,7 +72,7 @@ namespace Editor::Components
         }
     }
 
-    void ViewportRenderer::RenderScene(::Scene &scene, ::Camera &camera, ::Renderer &renderer, int width, int height)
+    void ViewportRenderer::RenderScene(::Scene &scene, ::BaseCamera &camera, ::Renderer &renderer, int width, int height)
     {
         if (width <= 0 || height <= 0)
             return;
@@ -101,7 +101,7 @@ namespace Editor::Components
         return m_Shader && m_SkyboxShader && m_OutlineShader;
     }
 
-    void ViewportRenderer::renderSkybox(::Camera &camera)
+    void ViewportRenderer::renderSkybox(::BaseCamera &camera)
     {
         if (!m_SkyboxShader)
             return;
@@ -116,18 +116,33 @@ namespace Editor::Components
         glDepthMask(GL_TRUE);
     }
 
-    void ViewportRenderer::renderSceneObjects(::Scene &scene, ::Camera &camera, ::Renderer &renderer)
+    void ViewportRenderer::renderSceneObjects(::Scene &scene, ::BaseCamera &camera, ::Renderer &renderer)
     {
+        (void)renderer; // Suppress unreferenced parameter warning
         if (!m_Shader)
             return;
 
         m_Shader->Bind();
         m_Shader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix().data);
 
-        scene.Render(renderer, camera, *m_Shader);
+        // Render each object with its material color
+        auto &objects = scene.GetObjects();
+        for (auto &object : objects)
+        {
+            if (object && object->IsVisible() && object->GetMesh())
+            {
+                m_Shader->SetUniformMat4("u_Model", object->GetModelMatrix().data);
+
+                // Set the material color uniform
+                Vec3 materialColor = object->GetMaterialColor();
+                m_Shader->SetUniform3f("u_MaterialColor", materialColor.x, materialColor.y, materialColor.z);
+
+                object->GetMesh()->Draw();
+            }
+        }
     }
 
-    void ViewportRenderer::renderSelectionOutlines(::Scene &scene, ::Camera &camera)
+    void ViewportRenderer::renderSelectionOutlines(::Scene &scene, ::BaseCamera &camera)
     {
         if (!m_OutlineShader)
             return;
@@ -139,36 +154,33 @@ namespace Editor::Components
         // Save OpenGL state
         GLboolean depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
         GLboolean cullFaceEnabled = glIsEnabled(GL_CULL_FACE);
+        GLint polygonMode[2];
+        glGetIntegerv(GL_POLYGON_MODE, polygonMode);
 
-        // First pass: Render expanded outline
+        // Enable wireframe mode for outline rendering
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
         glDisable(GL_CULL_FACE);
+
+        // Enable line smoothing and set line width for better outline quality
+        glEnable(GL_LINE_SMOOTH);
+        glLineWidth(2.0f);
+
         m_OutlineShader->Bind();
         m_OutlineShader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix().data);
         m_OutlineShader->SetUniformMat4("u_Model", selectedObject->GetModelMatrix().data);
-        m_OutlineShader->SetUniform3f("u_OutlineColor", 0.3f, 0.7f, 1.0f); // Soft blue color
-        m_OutlineShader->SetUniform1f("u_OutlineThickness", 0.05f);        // Smaller thickness
+        m_OutlineShader->SetUniform3f("u_OutlineColor", 0.7f, 0.9f, 1.0f); // Glowing light blue closer to white
 
         selectedObject->GetMesh()->Draw();
 
-        // Second pass: Render normal object on top
-        glDepthMask(GL_TRUE);
-        if (cullFaceEnabled)
-            glEnable(GL_CULL_FACE);
-
-        if (m_Shader)
-        {
-            m_Shader->Bind();
-            m_Shader->SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix().data);
-            m_Shader->SetUniformMat4("u_Model", selectedObject->GetModelMatrix().data);
-            selectedObject->GetMesh()->Draw();
-        }
-
         // Restore OpenGL state
+        glPolygonMode(GL_FRONT_AND_BACK, polygonMode[0]);
+        glDisable(GL_LINE_SMOOTH);
+        glLineWidth(1.0f);
+
         if (!depthTestEnabled)
             glDisable(GL_DEPTH_TEST);
-        if (!cullFaceEnabled)
-            glDisable(GL_CULL_FACE);
+        if (cullFaceEnabled)
+            glEnable(GL_CULL_FACE);
     }
 }

@@ -4,7 +4,7 @@
 #include <memory>
 
 // Forward declarations
-class Camera;
+class BaseCamera;
 class Scene;
 
 namespace Editor::Components
@@ -25,10 +25,10 @@ namespace Editor::Components
          * @param viewportPos Position of the viewport in screen space
          * @param viewportSize Size of the viewport
          */
-        void ProcessInput(::Scene &scene, ::Camera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize);
+        void ProcessInput(::Scene &scene, ::BaseCamera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize);
 
     private:
-        void handleObjectSelection(::Scene &scene, ::Camera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize);
+        void handleObjectSelection(::Scene &scene, ::BaseCamera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize);
         void handleCameraControls();
 
         bool isMouseInViewport(const ImVec2 &mousePos, const ImVec2 &viewportPos, const ImVec2 &viewportSize) const;

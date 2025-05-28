@@ -1,5 +1,6 @@
 #pragma once
 #include "../UI/Panel.h"
+#include "../../Engine/Graphics/Camera/BaseCamera.h"
 
 /**
  * @file Settings.h
@@ -23,9 +24,18 @@ namespace Editor::Components
         void Draw() override;
 
     private:
-        bool m_showGeneralSettings = true;
-        bool m_showThemeSettings = true;
-        bool m_showEditorSettings = true;
-        bool m_showDebugSettings = true;
+        // Camera settings
+        CameraType m_selectedCameraType = CameraType::PERSPECTIVE;
+        float m_perspectiveFOV = 60.0f;
+        float m_orthographicSize = 5.0f;
+        float m_cameraNearPlane = 0.1f;
+        float m_cameraFarPlane = 100.0f;
+
+        // Helper methods
+        void DrawCameraSettings();
+        void DrawCameraSelector();
+        void DrawCameraSpecificSettings();
+        const char *GetCameraTypeName(CameraType type) const;
+        const char *GetCameraCategory(CameraType type) const;
     };
 }

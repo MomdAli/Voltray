@@ -12,6 +12,7 @@ SceneObject::SceneObject(const std::string &name)
 SceneObject::SceneObject(std::shared_ptr<Mesh> mesh, const std::string &name)
     : m_Name(name), m_Transform(), m_Mesh(mesh), m_Visible(true)
 {
+    UpdatePivotFromMesh();
 }
 
 void SceneObject::GetWorldBounds(Vec3 &minBounds, Vec3 &maxBounds) const
@@ -65,4 +66,24 @@ void SceneObject::GetWorldBounds(Vec3 &minBounds, Vec3 &maxBounds) const
         maxBounds.y = std::max(maxBounds.y, transformedCorner.y);
         maxBounds.z = std::max(maxBounds.z, transformedCorner.z);
     }
+}
+
+void SceneObject::UpdatePivotFromMesh()
+{
+    if (m_Mesh)
+    {
+        Vec3 meshCenter = m_Mesh->GetCenter();
+        m_Transform.SetRelativePivot(meshCenter, m_RelativePivot);
+    }
+}
+
+void SceneObject::SetRelativePivot(const Vec3 &relativePivot)
+{
+    m_RelativePivot = relativePivot;
+    UpdatePivotFromMesh();
+}
+
+Vec3 SceneObject::GetRelativePivot() const
+{
+    return m_RelativePivot;
 }

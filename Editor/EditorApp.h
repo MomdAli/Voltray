@@ -73,6 +73,12 @@ namespace Editor
         bool &GetConsoleVisible() { return m_ConsoleVisible; }
         bool &GetSettingsVisible() { return m_SettingsVisible; }
 
+        /**
+         * @brief Get the viewport component
+         * @return Pointer to the viewport component
+         */
+        Components::Viewport *GetViewport() { return m_Viewport.get(); }
+
     private:
         std::unique_ptr<Components::Toolbar> m_Toolbar;
         std::unique_ptr<Components::Viewport> m_Viewport;

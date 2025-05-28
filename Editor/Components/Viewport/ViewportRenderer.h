@@ -4,7 +4,7 @@
 #include <glad/gl.h>
 
 // Forward declarations
-class Camera;
+class BaseCamera;
 class Scene;
 class Renderer;
 class Shader;
@@ -33,7 +33,7 @@ namespace Editor::Components
          * @param width Viewport width
          * @param height Viewport height
          */
-        void RenderScene(::Scene &scene, ::Camera &camera, ::Renderer &renderer, int width, int height);
+        void RenderScene(::Scene &scene, ::BaseCamera &camera, ::Renderer &renderer, int width, int height);
 
         /**
          * @brief Check if renderer is properly initialized
@@ -42,9 +42,9 @@ namespace Editor::Components
         bool IsInitialized() const;
 
     private:
-        void renderSkybox(::Camera &camera);
-        void renderSceneObjects(::Scene &scene, ::Camera &camera, ::Renderer &renderer);
-        void renderSelectionOutlines(::Scene &scene, ::Camera &camera);
+        void renderSkybox(::BaseCamera &camera);
+        void renderSceneObjects(::Scene &scene, ::BaseCamera &camera, ::Renderer &renderer);
+        void renderSelectionOutlines(::Scene &scene, ::BaseCamera &camera);
 
         // Shader resources
         std::unique_ptr<::Shader> m_Shader;

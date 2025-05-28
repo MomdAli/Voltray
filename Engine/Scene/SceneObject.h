@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Math/Transform.h"
+#include "../Math/Vec3.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
 #include <memory>
@@ -33,14 +34,26 @@ public:
     /**
      * @brief Virtual destructor.
      */
-    virtual ~SceneObject() = default;
-
-    // Transform operations
+    virtual ~SceneObject() = default; // Transform operations
     Transform &GetTransform() { return m_Transform; }
     const Transform &GetTransform() const { return m_Transform; }
 
-    // Mesh operations
-    void SetMesh(std::shared_ptr<Mesh> mesh) { m_Mesh = mesh; }
+    /**
+     * @brief Sets the relative pivot point where (0,0,0) represents the mesh center.
+     * @param relativePivot The pivot offset from mesh center.
+     */
+    void SetRelativePivot(const Vec3 &relativePivot);
+
+    /**
+     * @brief Gets the relative pivot point where (0,0,0) represents the mesh center.
+     * @return The relative pivot offset from mesh center.
+     */
+    Vec3 GetRelativePivot() const; // Mesh operations
+    void SetMesh(std::shared_ptr<Mesh> mesh)
+    {
+        m_Mesh = mesh;
+        UpdatePivotFromMesh();
+    }
     std::shared_ptr<Mesh> GetMesh() const { return m_Mesh; }
 
     // Properties
@@ -50,6 +63,10 @@ public:
     void SetVisible(bool visible) { m_Visible = visible; }
     bool IsSelected() const { return m_Selected; }
     void SetSelected(bool selected) { m_Selected = selected; }
+
+    // Material properties
+    const Vec3 &GetMaterialColor() const { return m_MaterialColor; }
+    void SetMaterialColor(const Vec3 &color) { m_MaterialColor = color; }
 
     /**
      * @brief Gets the model matrix for rendering.
@@ -68,12 +85,18 @@ public:
      * @brief Virtual update method - can be overridden for custom behavior.
      * @param deltaTime Time since last update in seconds.
      */
-    virtual void Update(float deltaTime) {}
+    virtual void Update(float deltaTime) { (void)deltaTime; }
 
     /**
      * @brief Virtual method called before rendering - can be overridden.
      */
     virtual void OnRender() {}
+
+private:
+    /**
+     * @brief Updates the transform pivot based on mesh center.
+     */
+    void UpdatePivotFromMesh();
 
 protected:
     std::string m_Name;
@@ -81,4 +104,8 @@ protected:
     std::shared_ptr<Mesh> m_Mesh;
     bool m_Visible = true;
     bool m_Selected = false;
+    // Default material color is white
+    Vec3 m_MaterialColor{1.0f, 1.0f, 1.0f};
+    // Store relative pivot offset from mesh center (0,0,0 = center)
+    Vec3 m_RelativePivot{0.0f, 0.0f, 0.0f};
 };
