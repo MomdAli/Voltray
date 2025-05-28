@@ -8,6 +8,10 @@ struct Vec3
     /// Default constructor. Initializes all components to zero.
     Vec3();
 
+    /// Constructs a vector with the same value for all components.
+    /// @param value The value to set for all components.
+    explicit Vec3(float value);
+
     /// Constructs a vector with the given x, y, and z components.
     /// @param x The x component.
     /// @param y The y component.

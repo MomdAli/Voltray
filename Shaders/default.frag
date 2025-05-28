@@ -4,6 +4,8 @@ in vec3 v_Normal;
 in vec2 v_TexCoord;
 in vec3 v_WorldPos;
 
+uniform vec3 u_MaterialColor;
+
 out vec4 FragColor;
 
 void main() {
@@ -12,9 +14,8 @@ void main() {
     vec3 normal = normalize(v_Normal);
     float diff = max(dot(normal, lightDir), 0.0);
 
-    // Base color with simple diffuse lighting
-    vec3 baseColor = vec3(0.8, 0.6, 0.4);
-    vec3 color = baseColor * (0.3 + 0.7 * diff); // ambient + diffuse
+    // Use material color with simple diffuse lighting
+    vec3 color = u_MaterialColor * (0.3 + 0.7 * diff); // ambient + diffuse
 
     FragColor = vec4(color, 1.0);
 }

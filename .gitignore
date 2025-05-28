@@ -5,6 +5,12 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 
+# Logs and debug files
+logs/
+*.log
+debug_startup.txt
+resource_debug_output.txt
+
 # Compiled binaries
 *.out
 *.o

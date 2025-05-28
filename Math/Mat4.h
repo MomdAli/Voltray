@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vec3.h"
+#include "vec4.h"
 
 /**
  * @brief 4x4 Matrix structure for 3D transformations and projections.
@@ -44,6 +45,13 @@ struct Mat4
     Vec3 MultiplyVec3(const Vec3 &v) const;
 
     /**
+     * @brief Transforms a Vec4 by this matrix.
+     * @param v The vector to transform.
+     * @return Transformed Vec4.
+     */
+    Vec4 MultiplyVec4(const Vec4 &v) const;
+
+    /**
      * @brief Creates a translation matrix.
      * @param translation The translation vector.
      * @return Translation matrix.
@@ -55,7 +63,19 @@ struct Mat4
      * @param scale The scaling vector.
      * @return Scaling matrix.
      */
-    static Mat4 Scale(const Vec3 &scale);
+    static Mat4 Scale(const Vec3 &scale); /**
+                                           * @brief Creates a rotation matrix around the X axis.
+                                           * @param angleRad Rotation angle in radians.
+                                           * @return Rotation matrix.
+                                           */
+    static Mat4 RotateX(float angleRad);
+
+    /**
+     * @brief Creates a rotation matrix around the Y axis.
+     * @param angleRad Rotation angle in radians.
+     * @return Rotation matrix.
+     */
+    static Mat4 RotateY(float angleRad);
 
     /**
      * @brief Creates a rotation matrix around the Z axis.
@@ -82,6 +102,18 @@ struct Mat4
      * @return Perspective projection matrix.
      */
     static Mat4 Perspective(float fovRadians, float aspect, float near, float far);
+
+    /**
+     * @brief Creates an orthographic projection matrix.
+     * @param left Left clipping plane.
+     * @param right Right clipping plane.
+     * @param bottom Bottom clipping plane.
+     * @param top Top clipping plane.
+     * @param near Near clipping plane.
+     * @param far Far clipping plane.
+     * @return Orthographic projection matrix.
+     */
+    static Mat4 Orthographic(float left, float right, float bottom, float top, float near, float far);
 
     /**
      * @brief Returns the inverse of this matrix.

@@ -1,3 +1,4 @@
+#include <glad/gl.h>
 #include "Input/Input.h"
 #include <GLFW/glfw3.h>
 
