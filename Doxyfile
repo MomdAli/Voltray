@@ -2,7 +2,7 @@
 PROJECT_NAME           = Voltray
 PROJECT_BRIEF          = "Modern C++ Game Engine with Editor"
 OUTPUT_DIRECTORY       = docs
-HTML_OUTPUT            = html
+HTML_OUTPUT            = .
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 RECURSIVE              = YES

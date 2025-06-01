@@ -204,10 +204,10 @@ if(DOXYGEN_FOUND)
         DEPENDS ${DOXYFILE_OUT} ${CMAKE_SOURCE_DIR}/docs/header.html
     )
 
-    # Add a target to prepare docs for GitHub Pages (copies from docs/html to docs-github-pages)
+    # Add a target to prepare docs for GitHub Pages (copies from docs/ to docs-github-pages)
     add_custom_target(voltray-docs-pages
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/docs-github-pages
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/docs/html ${CMAKE_SOURCE_DIR}/docs-github-pages
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/docs ${CMAKE_SOURCE_DIR}/docs-github-pages
         COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_SOURCE_DIR}/docs-github-pages/.nojekyll
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Preparing documentation for GitHub Pages deployment"
