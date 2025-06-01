@@ -24,7 +24,8 @@ HTML_COLORSTYLE        = LIGHT
 # Doxygen Awesome CSS files with Voltray custom theme
 HTML_EXTRA_STYLESHEET  = @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome.css \
                          @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-sidebar-only.css \
-                         @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-sidebar-only-darkmode-toggle.css
+                         @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-sidebar-only-darkmode-toggle.css \
+                         @CMAKE_SOURCE_DIR@/docs/voltray-custom.css
 
 # Voltray custom colors (electric blue game engine theme)
 HTML_COLORSTYLE_HUE    = 200
@@ -45,5 +46,5 @@ DOCSET_FEEDNAME        = "Voltray Documentation"
 
 # Clean branding with custom header for dark mode toggle
 PROJECT_LOGO           =
-HTML_HEADER            = docs/header.html
-HTML_FOOTER            =
+HTML_HEADER            = @CMAKE_SOURCE_DIR@/docs/header.html
+HTML_FOOTER            = @CMAKE_SOURCE_DIR@/docs/footer.html

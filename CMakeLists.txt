@@ -199,9 +199,9 @@ if(DOXYGEN_FOUND)
     add_custom_target(voltray-docs
         COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Generating Voltray API documentation with custom theme"
+        COMMENT "Generating Voltray API documentation with sidebar-only theme"
         VERBATIM
-        DEPENDS ${DOXYFILE_OUT} ${CMAKE_SOURCE_DIR}/docs/header.html
+        DEPENDS ${DOXYFILE_OUT} ${CMAKE_SOURCE_DIR}/docs/header.html ${CMAKE_SOURCE_DIR}/docs/footer.html ${CMAKE_SOURCE_DIR}/docs/voltray-custom.css
     )
 
     # Add a target to prepare docs for GitHub Pages (copies from docs/ to docs-github-pages)
