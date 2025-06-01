@@ -81,6 +81,7 @@ public:
     virtual void Update();
     virtual void ProcessInput();
     virtual void SetInputEnabled(bool enabled);
+    virtual void SetMouseMovementActive(bool active); // New method
     virtual bool IsInputEnabled() const { return m_InputEnabled; }
 
     // Viewport bounds for input constraint
@@ -110,6 +111,7 @@ protected:
 
     // Input handling
     bool m_InputEnabled = true;
+    bool m_isMouseMovementActive = true; // New member
     float m_MouseSensitivity = 0.1f;
     float m_ZoomSpeed = 1.0f;
     bool m_CursorHidden = false;

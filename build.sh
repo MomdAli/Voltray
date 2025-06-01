@@ -1,10 +1,9 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
 # === CONFIG ===
 BUILD_TYPE=Release
 BUILD_DIR=build
-BUILD_DOC=voltray-docs
 
 # Clean up any existing build directory if running in WSL
 if grep -q Microsoft /proc/version 2>/dev/null; then
@@ -35,7 +34,26 @@ fi
 
 # === GENERATE PROJECT FILES ===
 echo "Configuring project with CMake..."
-cmake -B "$BUILD_DIR" -G "$GENERATOR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+# Check for ccache to speed up compilation
+if command -v ccache &> /dev/null; then
+    echo "Using ccache for faster compilation..."
+    CMAKE_CCACHE_FLAGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+else
+    CMAKE_CCACHE_FLAGS=""
+fi
+
+# Additional flags for WSL/Linux to handle compiler warnings
+if grep -q Microsoft /proc/version 2>/dev/null || [ "$(uname)" == "Linux" ]; then
+    echo "Linux/WSL environment detected, adding compiler flags for external dependencies..."
+    cmake -B "$BUILD_DIR" -G "$GENERATOR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+        -DCMAKE_CXX_FLAGS="-Wno-error=array-bounds -Wno-error=stringop-overflow" \
+        -DASSIMP_WARNINGS_AS_ERRORS=OFF \
+        $CMAKE_CCACHE_FLAGS
+else
+    cmake -B "$BUILD_DIR" -G "$GENERATOR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+        $CMAKE_CCACHE_FLAGS
+fi
 
 if [ $? -ne 0 ]; then
     echo "Failed to configure the project."
@@ -44,7 +62,18 @@ fi
 
 # === BUILD PROJECT ===
 echo "Building project..."
-cmake --build "$BUILD_DIR" --config $BUILD_TYPE
+
+# Determine number of parallel jobs
+if [ "$(uname)" == "Darwin" ]; then
+    JOBS=$(sysctl -n hw.ncpu)
+elif command -v nproc &> /dev/null; then
+    JOBS=$(nproc)
+else
+    JOBS=4  # fallback
+fi
+
+echo "Building with $JOBS parallel jobs..."
+cmake --build "$BUILD_DIR" --config $BUILD_TYPE --parallel $JOBS
 
 if [ $? -ne 0 ]; then
     echo "Build failed."
@@ -55,13 +84,14 @@ echo "Build successful!"
 
 # === GENERATE DOCUMENTATION ===
 echo "Generating documentation..."
-cmake --build "$BUILD_DIR" --target voltray-docs --config $BUILD_TYPE
+cmake --build "$BUILD_DIR" --target doc --config $BUILD_TYPE
 
 # === RUN THE ENGINE ===
 # Check if we're on macOS, Linux or WSL and adjust paths accordingly
 if [ "$(uname)" == "Darwin" ]; then
     # macOS path
     EXE_PATH="$BUILD_DIR/Voltray"
+    EXE_DIR="$BUILD_DIR"
 elif grep -q Microsoft /proc/version 2>/dev/null; then
     # WSL path - need to use Windows path format for executable
     echo "WSL environment detected, won't attempt to run the executable directly."
@@ -70,6 +100,7 @@ elif grep -q Microsoft /proc/version 2>/dev/null; then
 else
     # Regular Linux path
     EXE_PATH="$BUILD_DIR/Voltray"
+    EXE_DIR="$BUILD_DIR"
 fi
 
 if [ -z "$EXE_PATH" ]; then
@@ -77,9 +108,10 @@ if [ -z "$EXE_PATH" ]; then
     exit 0
 elif [ -f "$EXE_PATH" ]; then
     echo "Running Voltray..."
-    "$EXE_PATH"
+    cd "$EXE_DIR"
+    ./Voltray
+    cd - > /dev/null
 else
-    echo "Warning: Voltray executable not found at $EXE_PATH"
-    echo "You may need to run it manually after building."
-    exit 0
+    echo "Error: Voltray executable not found at $EXE_PATH"
+    exit 1
 fi

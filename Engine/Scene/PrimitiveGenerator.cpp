@@ -149,7 +149,6 @@ std::shared_ptr<Mesh> PrimitiveGenerator::CreateSphere(float radius, int widthSe
             int b = a + 1;
             int c = (y + 1) * (widthSegments + 1) + x;
             int d = c + 1;
-
             if (y != 0) // Skip top cap
                 AddTriangle(indices, a, b, c);
             if (y != heightSegments - 1) // Skip bottom cap

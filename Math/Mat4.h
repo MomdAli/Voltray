@@ -120,9 +120,4 @@ struct Mat4
      * @return Inverse matrix.
      */
     Mat4 Inverse() const;
-
-    /**
-     * @brief Prints the matrix to the standard output.
-     */
-    void Print() const;
 };

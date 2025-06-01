@@ -75,7 +75,7 @@ namespace Editor::Components
          * @param fov Field of view for perspective cameras
          * @param orthoSize Orthographic size for parallel cameras
          */
-        void UpdateCameraSettings(float fov, float orthoSize);
+        void UpdateCameraSettings(float fov, float orthoSize, float nearPlane, float farPlane);
 
         /**
          * @brief Get current camera type

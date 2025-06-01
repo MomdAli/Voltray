@@ -89,31 +89,27 @@ namespace Editor::Components
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         {
             auto &transform = object->GetTransform();
-            bool transformChanged = false;
 
             // Position
             Vec3 position = transform.GetPosition();
             float pos[3] = {position.x, position.y, position.z};
-            if (ImGui::DragFloat3("Position", pos, 0.1f, -1000.0f, 1000.0f, "%.2f"))
+            if (ImGui::DragFloat3("Position", pos, 0.1f, -FLT_MAX, FLT_MAX, "%.2f"))
             {
                 transform.SetPosition(Vec3(pos[0], pos[1], pos[2]));
-                transformChanged = true;
             }
 
             // Rotation
             Vec3 rotation = transform.GetRotation();
             float rot[3] = {rotation.x, rotation.y, rotation.z};
-            if (ImGui::DragFloat3("Rotation", rot, 1.0f, -360.0f, 360.0f, "%.1f°"))
+            if (ImGui::DragFloat3("Rotation", rot, 1.0f, -FLT_MAX, FLT_MAX, "%.1f°"))
             {
                 transform.SetRotation(Vec3(rot[0], rot[1], rot[2]));
-                transformChanged = true;
             } // Scale
             Vec3 scale = transform.GetScale();
             float scl[3] = {scale.x, scale.y, scale.z};
-            if (ImGui::DragFloat3("Scale", scl, 0.01f, 0.001f, 100.0f, "%.3f"))
+            if (ImGui::DragFloat3("Scale", scl, 0.01f, -FLT_MAX, FLT_MAX, "%.3f"))
             {
                 transform.SetScale(Vec3(scl[0], scl[1], scl[2]));
-                transformChanged = true;
             }
 
             ImGui::Spacing();
@@ -124,12 +120,13 @@ namespace Editor::Components
             if (ImGui::DragFloat3("Pivot", pivot, 0.01f, -10.0f, 10.0f, "%.3f"))
             {
                 object->SetRelativePivot(Vec3(pivot[0], pivot[1], pivot[2]));
-                transformChanged = true;
             }
 
             // Help text for pivot
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
-            ImGui::TextWrapped("(0,0,0) = mesh center");
+            ImGui::TextWrapped("Pivot is relative to the mesh center.\n"
+                               "Setting it to (0,0,0) will center the object.\n"
+                               "Adjusting pivot allows for easier rotation and scaling around a specific point.");
             ImGui::PopStyleColor();
 
             ImGui::Spacing();
@@ -139,13 +136,6 @@ namespace Editor::Components
             {
                 transform.Reset();
                 object->SetRelativePivot(Vec3(0.0f, 0.0f, 0.0f)); // Reset pivot to center
-                transformChanged = true;
-            }
-
-            if (transformChanged)
-            {
-                // The transform automatically invalidates its matrix when properties change
-                // No additional action needed due to the Transform class design
             }
         }
     }

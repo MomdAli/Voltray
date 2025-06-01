@@ -9,13 +9,15 @@ namespace Editor::Components
     std::unique_ptr<Console> Console::s_instance = nullptr;
 
     Console::Console()
+        : m_autoScroll(true), m_showTimestamps(true),
+          m_showInfo(true), m_showWarning(true), m_showError(true),
+          m_showDebug(true), m_showSuccess(true)
     {
         // Initialize the console with a welcome message
         AddMessage("Console initialized", MessageType::Success);
     }
 
     Console::~Console() = default;
-
     Console &Console::GetInstance()
     {
         if (!s_instance)
@@ -122,11 +124,9 @@ namespace Editor::Components
             m_messages.erase(m_messages.begin(), m_messages.begin() + 100);
         }
     }
-
     void Console::Clear()
     {
         m_messages.clear();
-        AddMessage("Console cleared", MessageType::Info);
     }
 
     ImVec4 Console::GetMessageColor(MessageType type) const

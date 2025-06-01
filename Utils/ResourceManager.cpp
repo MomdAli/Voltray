@@ -1,5 +1,6 @@
 #include "ResourceManager.h"
 #include <iostream>
+#include <vector>
 
 // Static member initialization
 std::string ResourceManager::s_executablePath = "";

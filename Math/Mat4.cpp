@@ -55,21 +55,23 @@ Vec4 Mat4::MultiplyVec4(const Vec4 &v) const
 Mat4 Mat4::Translate(const Vec3 &t)
 {
     Mat4 result = Identity();
-    result.data[12] = t.x;
-    result.data[13] = t.y;
-    result.data[14] = t.z;
+    result.data[12] = t.x; // [3][0]
+    result.data[13] = t.y; // [3][1]
+    result.data[14] = t.z; // [3][2]
     return result;
 }
 
 Mat4 Mat4::Scale(const Vec3 &s)
 {
     Mat4 result = Identity();
-    result.data[0] = s.x;
-    result.data[5] = s.y;
-    result.data[10] = s.z;
+    result.data[0] = s.x;  // [0][0]
+    result.data[5] = s.y;  // [1][1]
+    result.data[10] = s.z; // [2][2]
     return result;
 }
 
+// Source: https://www.brainvoyager.com/bv/doc/UsersGuide/CoordsAndTransforms/SpatialTransformationMatrices.html
+// ----------------------------------------------------------------------------
 Mat4 Mat4::RotateX(float angleRad)
 {
     Mat4 result = Identity();
@@ -104,13 +106,14 @@ Mat4 Mat4::RotateZ(float angleRad)
     float cosAngle = std::cos(angleRad);
     float sinAngle = std::sin(angleRad);
 
-    result.data[0] = cosAngle;
-    result.data[1] = -sinAngle;
-    result.data[4] = sinAngle;
-    result.data[5] = cosAngle;
+    result.data[0] = cosAngle;  // [0][0]
+    result.data[1] = -sinAngle; // [0][1]
+    result.data[4] = sinAngle;  // [1][0]
+    result.data[5] = cosAngle;  // [1][1]
 
     return result;
 }
+// ----------------------------------------------------------------------------
 
 Mat4 Mat4::LookAt(const Vec3 &eye, const Vec3 &center, const Vec3 &up)
 {
@@ -170,6 +173,7 @@ Mat4 Mat4::Orthographic(float left, float right, float bottom, float top, float 
     return result;
 }
 
+// TODO: Optimize this inverse function for performance
 Mat4 Mat4::Inverse() const
 {
     // This is a generic 4x4 matrix inverse implementation (not optimized)
@@ -296,17 +300,4 @@ Mat4 Mat4::Inverse() const
     for (int i = 0; i < 16; i++)
         invOut[i] *= det;
     return inv;
-}
-
-void Mat4::Print() const
-{
-    for (int row = 0; row < 4; ++row)
-    {
-        std::cout << "| ";
-        for (int col = 0; col < 4; ++col)
-        {
-            std::cout << data[col + row * 4] << " ";
-        }
-        std::cout << "|\n";
-    }
 }

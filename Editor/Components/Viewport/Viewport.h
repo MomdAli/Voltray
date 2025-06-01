@@ -8,6 +8,12 @@
 #include "ViewportInput.h"
 #include "ViewportScene.h"
 
+// Forward declarations
+namespace Editor::Components
+{
+    class Settings;
+}
+
 namespace Editor::Components
 {
     /**

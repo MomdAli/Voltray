@@ -1,5 +1,7 @@
 #include "Viewport.h"
 #include "Console.h"
+#include "../Settings.h"
+#include "../../EditorApp.h"
 #include <imgui.h>
 #include <stdexcept>
 

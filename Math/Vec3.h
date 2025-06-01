@@ -38,6 +38,10 @@ struct Vec3
     /// @return The result of scalar division.
     Vec3 operator/(float scalar) const;
 
+    /// Negates the vector (flips the sign of all components).
+    /// @return The negated vector.
+    Vec3 operator-() const;
+
     /// Calculates the length (magnitude) of the vector.
     /// @return The length of the vector.
     float Length() const;
@@ -55,9 +59,6 @@ struct Vec3
     /// @param other The other vector.
     /// @return The cross product vector.
     Vec3 Cross(const Vec3 &other) const;
-
-    /// Prints the vector components to the standard output.
-    void Print() const;
 
     /// Compound addition assignment.
     Vec3 &operator+=(const Vec3 &other);

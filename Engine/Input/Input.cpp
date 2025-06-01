@@ -86,6 +86,22 @@ void Input::Update()
     s_LastMouseY = y;
 }
 
+void Input::HideCursor()
+{
+    if (!s_Window)
+        return;
+
+    glfwSetInputMode(s_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void Input::ShowCursor()
+{
+    if (!s_Window)
+        return;
+
+    glfwSetInputMode(s_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
 double Input::GetMouseDeltaX()
 {
     if (!s_Window)

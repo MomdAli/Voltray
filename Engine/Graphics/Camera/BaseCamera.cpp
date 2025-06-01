@@ -26,6 +26,11 @@ BaseCamera::BaseCamera(const std::string &name, float aspect, float nearPlane, f
 
 BaseCamera::~BaseCamera() = default;
 
+void BaseCamera::SetMouseMovementActive(bool active)
+{
+    m_isMouseMovementActive = active;
+}
+
 Mat4 BaseCamera::GetViewMatrix() const
 {
     if (m_ViewMatrixDirty)
@@ -192,27 +197,25 @@ void BaseCamera::ProcessMouseInput()
 
     if (mmb && !wasMmb && IsMouseInViewport())
     {
-        // Hide cursor and enable unlimited movement
-        glfwSetInputMode(Input::s_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        Input::HideCursor();
         m_CursorHidden = true;
-        Input::ResetMouseDelta(); // Optionally reset delta to avoid jump
     }
     else if (!mmb && wasMmb && m_CursorHidden)
     {
-        // Show cursor again
-        glfwSetInputMode(Input::s_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        Input::ShowCursor();
         m_CursorHidden = false;
-        Input::ResetMouseDelta();
     }
-
-    // Update the previous state
     wasMmb = mmb;
 
-    // Only process camera movement if middle mouse is pressed AND mouse started in viewport
-    if (!mmb)
+    // Only process camera movement if middle mouse is pressed, cursor is hidden (in camera mode),
+    // AND mouse movement is currently active for the camera.
+    if (!mmb || !m_CursorHidden || !m_isMouseMovementActive) // Added !m_isMouseMovementActive check
+    {
         return;
+    }
 
     // Check if mouse is in viewport OR if we're already in camera control mode (cursor hidden)
+    // This check might be redundant given the m_CursorHidden check above, but kept for consistency if it serves other purposes.
     if (!m_CursorHidden && !IsMouseInViewport())
         return;
 
@@ -272,17 +275,17 @@ void BaseCamera::ProcessKeyboardInput()
     Vec3 right = GetRight();
     Vec3 movement(0.0f);
 
-    if (Input::IsKeyPressed(GLFW_KEY_W))
+    if (Input::IsKeyPressed(GLFW_KEY_UP))
         movement += forward;
-    if (Input::IsKeyPressed(GLFW_KEY_S))
+    if (Input::IsKeyPressed(GLFW_KEY_DOWN))
         movement -= forward;
-    if (Input::IsKeyPressed(GLFW_KEY_D))
+    if (Input::IsKeyPressed(GLFW_KEY_RIGHT))
         movement += right;
-    if (Input::IsKeyPressed(GLFW_KEY_A))
+    if (Input::IsKeyPressed(GLFW_KEY_LEFT))
         movement -= right;
-    if (Input::IsKeyPressed(GLFW_KEY_Q))
+    if (Input::IsKeyPressed(GLFW_KEY_PAGE_UP))
         movement += m_Up;
-    if (Input::IsKeyPressed(GLFW_KEY_E))
+    if (Input::IsKeyPressed(GLFW_KEY_PAGE_DOWN))
         movement -= m_Up;
 
     if (movement.Length() > 0.0f)

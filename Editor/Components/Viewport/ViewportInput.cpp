@@ -4,6 +4,7 @@
 #include "../../Engine/Scene/SceneObject.h"
 #include "../../Engine/Input/Input.h"
 #include "../../Math/Ray.h"
+#include "../../Math/Mat4.h"
 #include <GLFW/glfw3.h>
 #include <limits>
 
@@ -24,7 +25,7 @@ namespace Editor::Components
             if (selectedObject)
             {
                 Vec3 objectPosition = selectedObject->GetTransform().GetPosition();
-                camera.FocusOnObjectSmooth(objectPosition, 0.8f);
+                camera.FocusOnObjectSmooth(objectPosition, 0.5f);
             }
         }
 
@@ -34,7 +35,6 @@ namespace Editor::Components
             handleObjectSelection(scene, camera, viewportPos, viewportSize);
         }
     }
-
     void ViewportInput::handleObjectSelection(::Scene &scene, ::BaseCamera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
     {
         ImVec2 mousePos = ImGui::GetMousePos();
@@ -47,28 +47,43 @@ namespace Editor::Components
             return;
         }
 
-        // Create ray from camera through mouse position
-        Ray ray = camera.ScreenToWorldRay(mousePos.x, mousePos.y);
+        // Create ray from camera through mouse position (using viewport-relative coordinates)
+        Ray ray = camera.ScreenToWorldRay(relativePos.x, relativePos.y);
 
         std::shared_ptr<SceneObject> closestObject = nullptr;
         float closestDistance = std::numeric_limits<float>::max();
         const auto &objects = scene.GetObjects();
-
-        // Test ray intersection with all visible objects
         for (const auto &obj : objects)
         {
-            if (obj && obj->IsVisible())
+            if (obj)
             {
+
+                // First, perform AABB intersection test for early rejection
                 Vec3 minBounds, maxBounds;
                 obj->GetWorldBounds(minBounds, maxBounds);
 
-                float intersectionDistance;
-                if (ray.IntersectAABB(minBounds, maxBounds, intersectionDistance))
+                float aabbDistance;
+                if (!ray.IntersectAABB(minBounds, maxBounds, aabbDistance))
                 {
-                    if (intersectionDistance < closestDistance && intersectionDistance > 0.0f)
+                    // Ray doesn't intersect the AABB, skip expensive mesh intersection
+                    continue;
+                }
+
+                // AABB test passed, now do detailed mesh intersection
+                float intersectionDistance = 0.0f;
+                auto mesh = obj->GetMesh();
+                if (mesh)
+                {
+                    // Get the object's model matrix (local to world transformation)
+                    Mat4 modelMatrix = obj->GetModelMatrix();
+                    if (ray.IntersectMesh(mesh->GetVertices(), mesh->GetIndices(), modelMatrix, intersectionDistance))
                     {
-                        closestDistance = intersectionDistance;
-                        closestObject = obj;
+                        // Check if this is the closest object
+                        if (intersectionDistance < closestDistance)
+                        {
+                            closestDistance = intersectionDistance;
+                            closestObject = obj;
+                        }
                     }
                 }
             }

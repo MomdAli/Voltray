@@ -79,6 +79,10 @@ namespace Editor::Components
             auto ground = ::SceneObjectFactory::CreatePlane("Ground", 10.0f, 10.0f);
             ground->GetTransform().SetPosition(::Vec3(0.0f, -2.0f, 0.0f));
             m_Scene->AddObject(ground);
+
+            // Select the cube by default
+            m_Scene->SelectObject(cube);
+            Console::Print("Demo scene created with cube selected by default");
         }
         catch (const std::exception &e)
         {
@@ -105,6 +109,25 @@ namespace Editor::Components
             catch (const std::exception &e)
             {
                 Console::PrintWarning("Exception loading pyramid: " + std::string(e.what()));
+            }
+        }
+
+        // Blender monkey model
+        modelPath = ::ResourceManager::GetResourcePath("Models/Suzanne.obj");
+        if (!modelPath.empty())
+        {
+            try
+            {
+                auto monkey = ::SceneObjectFactory::LoadFromFile(modelPath, "Suzanne");
+                if (monkey)
+                {
+                    monkey->GetTransform().SetPosition(::Vec3(3.0f, 2.0f, 0.0f));
+                    m_Scene->AddObject(monkey);
+                }
+            }
+            catch (const std::exception &e)
+            {
+                Console::PrintWarning("Exception loading monkey: " + std::string(e.what()));
             }
         }
     }
@@ -135,7 +158,7 @@ namespace Editor::Components
         Console::Print("Switched to camera: " + std::string(m_Camera->GetTypeName()));
     }
 
-    void ViewportScene::UpdateCameraSettings(float fov, float orthoSize)
+    void ViewportScene::UpdateCameraSettings(float fov, float orthoSize, float nearPlane, float farPlane)
     {
         if (!m_Camera)
         {
@@ -146,12 +169,14 @@ namespace Editor::Components
         if (auto *perspectiveCamera = dynamic_cast<PerspectiveCamera *>(m_Camera.get()))
         {
             perspectiveCamera->SetFieldOfView(fov);
+            perspectiveCamera->SetClippingPlanes(nearPlane, farPlane);
         }
 
         // Try to cast to orthographic camera for orthographic size setting
         if (auto *orthographicCamera = dynamic_cast<OrthographicCamera *>(m_Camera.get()))
         {
             orthographicCamera->SetOrthographicSize(orthoSize);
+            orthographicCamera->SetClippingPlanes(nearPlane, farPlane);
         }
     }
 

@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
+#include <fstream>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -13,8 +15,43 @@ std::string CrashLogger::s_LogFile = "";
 
 void CrashLogger::Initialize()
 {
-    if (s_Initialized)
+    s_Initialized = true;
+}
+
+void CrashLogger::LogException(const std::string &message)
+{
+    CreateLogFileIfNeeded();
+    WriteLog("EXCEPTION: " + message);
+
+    // Also show message box on Windows
+#ifdef _WIN32
+    MessageBoxA(nullptr, message.c_str(), "Voltray Exception", MB_OK | MB_ICONERROR);
+#endif
+}
+
+#ifdef _WIN32
+void CrashLogger::LogCrash(PEXCEPTION_POINTERS exInfo)
+{
+    if (!exInfo || !exInfo->ExceptionRecord)
         return;
+
+    CreateLogFileIfNeeded();
+
+    std::stringstream ss;
+    ss << "CRASH: Exception code 0x" << std::hex << exInfo->ExceptionRecord->ExceptionCode
+       << " at address 0x" << std::hex << (uintptr_t)exInfo->ExceptionRecord->ExceptionAddress;
+
+    WriteLog(ss.str());
+
+    // Show message box
+    MessageBoxA(nullptr, ss.str().c_str(), "Voltray Crash Detected", MB_OK | MB_ICONERROR);
+}
+#endif
+
+void CrashLogger::CreateLogFileIfNeeded()
+{
+    if (!s_LogFile.empty())
+        return; // Log file already created
 
     const std::string logDir = GetLogDirectory();
 
@@ -35,36 +72,7 @@ void CrashLogger::Initialize()
         log << std::endl;
         log.close();
     }
-
-    s_Initialized = true;
 }
-
-void CrashLogger::LogException(const std::string &message)
-{
-    WriteLog("EXCEPTION: " + message);
-
-    // Also show message box on Windows
-#ifdef _WIN32
-    MessageBoxA(nullptr, message.c_str(), "Voltray Exception", MB_OK | MB_ICONERROR);
-#endif
-}
-
-#ifdef _WIN32
-void CrashLogger::LogCrash(PEXCEPTION_POINTERS exInfo)
-{
-    if (!exInfo || !exInfo->ExceptionRecord)
-        return;
-
-    std::stringstream ss;
-    ss << "CRASH: Exception code 0x" << std::hex << exInfo->ExceptionRecord->ExceptionCode
-       << " at address 0x" << std::hex << (uintptr_t)exInfo->ExceptionRecord->ExceptionAddress;
-
-    WriteLog(ss.str());
-
-    // Show message box
-    MessageBoxA(nullptr, ss.str().c_str(), "Voltray Crash Detected", MB_OK | MB_ICONERROR);
-}
-#endif
 
 std::string CrashLogger::GetLogDirectory()
 {

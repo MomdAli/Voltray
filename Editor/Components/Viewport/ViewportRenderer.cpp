@@ -140,6 +140,9 @@ namespace Editor::Components
                 object->GetMesh()->Draw();
             }
         }
+
+        // Unbind shader to prevent conflicts
+        m_Shader->Unbind();
     }
 
     void ViewportRenderer::renderSelectionOutlines(::Scene &scene, ::BaseCamera &camera)

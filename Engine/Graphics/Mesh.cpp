@@ -8,6 +8,9 @@ Mesh::Mesh(float *vertices, unsigned int vSize, unsigned int *indices, unsigned 
     // Store vertex data
     m_Vertices.assign(vertices, vertices + (vSize / sizeof(float)));
 
+    // Store index data
+    m_Indices.assign(indices, indices + iCount);
+
     m_VAO.Bind();
     m_VBO.Bind();
     m_IBO.Bind();
@@ -17,7 +20,7 @@ Mesh::Mesh(float *vertices, unsigned int vSize, unsigned int *indices, unsigned 
 Mesh::Mesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices)
     : m_VBO(const_cast<float *>(vertices.data()), vertices.size() * sizeof(float)),
       m_IBO(const_cast<unsigned int *>(indices.data()), indices.size()),
-      m_Vertices(vertices)
+      m_Vertices(vertices), m_Indices(indices)
 {
     m_VAO.Bind();
     m_VBO.Bind();

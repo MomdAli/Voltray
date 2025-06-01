@@ -58,6 +58,49 @@ public:
     void Scale(const Vec3 &scale);
     void Scale(float uniformScale);
 
+    // Local space transformation operations
+    /**
+     * @brief Translates the object along its local axes.
+     * @param localTranslation Translation vector in local space (relative to object's rotation).
+     */
+    void TranslateLocal(const Vec3 &localTranslation);
+
+    /**
+     * @brief Translates the object along its local X axis.
+     * @param distance Distance to move along local X axis.
+     */
+    void TranslateLocalX(float distance);
+
+    /**
+     * @brief Translates the object along its local Y axis.
+     * @param distance Distance to move along local Y axis.
+     */
+    void TranslateLocalY(float distance);
+
+    /**
+     * @brief Translates the object along its local Z axis.
+     * @param distance Distance to move along local Z axis.
+     */
+    void TranslateLocalZ(float distance);
+
+    /**
+     * @brief Gets the local X axis (right vector) of the object.
+     * @return Normalized vector representing the object's local X axis.
+     */
+    Vec3 GetLocalRight() const;
+
+    /**
+     * @brief Gets the local Y axis (up vector) of the object.
+     * @return Normalized vector representing the object's local Y axis.
+     */
+    Vec3 GetLocalUp() const;
+
+    /**
+     * @brief Gets the local Z axis (forward vector) of the object.
+     * @return Normalized vector representing the object's local Z axis.
+     */
+    Vec3 GetLocalForward() const;
+
     /**
      * @brief Gets the transformation matrix.
      * @return The 4x4 transformation matrix (Translation * Rotation * Scale).

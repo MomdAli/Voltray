@@ -209,9 +209,9 @@ namespace Editor::Components
                 EngineSettings::ClearColor[3] = 1.0f;
                 Console::Print("Engine settings reset to defaults");
             }
-
             ImGui::Unindent();
         }
+
         if (ImGui::CollapsingHeader("Camera Settings"))
         {
             DrawCameraSettings();
@@ -303,7 +303,7 @@ namespace Editor::Components
             ImGui::TextWrapped("Field of View:");
             if (ImGui::SliderFloat("##FOV", &m_perspectiveFOV, 10.0f, 120.0f, "%.1f°"))
             {
-                viewportScene.UpdateCameraSettings(m_perspectiveFOV, m_orthographicSize);
+                viewportScene.UpdateCameraSettings(m_perspectiveFOV, m_orthographicSize, m_cameraNearPlane, m_cameraFarPlane);
             }
         }
         else if (strcmp(category, "Orthographic") == 0)
@@ -312,7 +312,7 @@ namespace Editor::Components
             ImGui::TextWrapped("Orthographic Size:");
             if (ImGui::SliderFloat("##OrthoSize", &m_orthographicSize, 1.0f, 20.0f, "%.1f"))
             {
-                viewportScene.UpdateCameraSettings(m_perspectiveFOV, m_orthographicSize);
+                viewportScene.UpdateCameraSettings(m_perspectiveFOV, m_orthographicSize, m_cameraNearPlane, m_cameraFarPlane);
             }
         } // Common camera information
         ImGui::Separator();
@@ -328,8 +328,8 @@ namespace Editor::Components
 
         if (nearChanged || farChanged)
         {
-            // TODO: Update camera near/far planes
-            // This would require extending the camera interface to support near/far plane updates
+            // Update camera near/far planes
+            viewportScene.UpdateCameraSettings(m_perspectiveFOV, m_orthographicSize, m_cameraNearPlane, m_cameraFarPlane);
         }
     }
     const char *Settings::GetCameraTypeName(CameraType type) const

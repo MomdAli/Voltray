@@ -88,6 +88,70 @@ void Transform::Scale(float uniformScale)
     InvalidateMatrix();
 }
 
+// Local space transformation methods
+void Transform::TranslateLocal(const Vec3 &localTranslation)
+{
+    // Create rotation matrix to transform from local to world space
+    Mat4 rotationX = Mat4::RotateX(m_Rotation.x * DEG2RAD);
+    Mat4 rotationY = Mat4::RotateY(m_Rotation.y * DEG2RAD);
+    Mat4 rotationZ = Mat4::RotateZ(m_Rotation.z * DEG2RAD);
+    Mat4 rotation = rotationZ * rotationY * rotationX;
+
+    // Transform the local translation vector to world space
+    Vec3 worldTranslation = rotation.MultiplyVec3(localTranslation);
+
+    // Apply the world space translation
+    Translate(worldTranslation);
+}
+
+void Transform::TranslateLocalX(float distance)
+{
+    TranslateLocal(Vec3(distance, 0.0f, 0.0f));
+}
+
+void Transform::TranslateLocalY(float distance)
+{
+    TranslateLocal(Vec3(0.0f, distance, 0.0f));
+}
+
+void Transform::TranslateLocalZ(float distance)
+{
+    TranslateLocal(Vec3(0.0f, 0.0f, distance));
+}
+
+Vec3 Transform::GetLocalRight() const
+{
+    // Local X axis is (1, 0, 0) in local space
+    Mat4 rotationX = Mat4::RotateX(m_Rotation.x * DEG2RAD);
+    Mat4 rotationY = Mat4::RotateY(m_Rotation.y * DEG2RAD);
+    Mat4 rotationZ = Mat4::RotateZ(m_Rotation.z * DEG2RAD);
+    Mat4 rotation = rotationZ * rotationY * rotationX;
+
+    return rotation.MultiplyVec3(Vec3(1.0f, 0.0f, 0.0f)).Normalize();
+}
+
+Vec3 Transform::GetLocalUp() const
+{
+    // Local Y axis is (0, 1, 0) in local space
+    Mat4 rotationX = Mat4::RotateX(m_Rotation.x * DEG2RAD);
+    Mat4 rotationY = Mat4::RotateY(m_Rotation.y * DEG2RAD);
+    Mat4 rotationZ = Mat4::RotateZ(m_Rotation.z * DEG2RAD);
+    Mat4 rotation = rotationZ * rotationY * rotationX;
+
+    return rotation.MultiplyVec3(Vec3(0.0f, 1.0f, 0.0f)).Normalize();
+}
+
+Vec3 Transform::GetLocalForward() const
+{
+    // Local Z axis is (0, 0, 1) in local space
+    Mat4 rotationX = Mat4::RotateX(m_Rotation.x * DEG2RAD);
+    Mat4 rotationY = Mat4::RotateY(m_Rotation.y * DEG2RAD);
+    Mat4 rotationZ = Mat4::RotateZ(m_Rotation.z * DEG2RAD);
+    Mat4 rotation = rotationZ * rotationY * rotationX;
+
+    return rotation.MultiplyVec3(Vec3(0.0f, 0.0f, 1.0f)).Normalize();
+}
+
 Mat4 Transform::GetMatrix() const
 {
     if (m_MatrixDirty)
@@ -100,11 +164,9 @@ Mat4 Transform::GetMatrix() const
 
 Mat4 Transform::GetInverseMatrix() const
 {
-    Mat4 invTranslation = Mat4::Translate(Vec3(-m_Position.x, -m_Position.y, -m_Position.z));
-
-    Vec3 absolutePivot = m_MeshCenter + m_Pivot;
-    Mat4 translateToPivot = Mat4::Translate(absolutePivot);
-    Mat4 translateFromPivot = Mat4::Translate(Vec3(-absolutePivot.x, -absolutePivot.y, -absolutePivot.z));
+    // Create inverse transformation matrices (reverse order of UpdateMatrix)
+    Mat4 invTranslation = Mat4::Translate(-m_Position);
+    Mat4 invTranslateFromPivot = Mat4::Translate(-m_Pivot);
 
     Mat4 invRotationX = Mat4::RotateX(-m_Rotation.x * DEG2RAD);
     Mat4 invRotationY = Mat4::RotateY(-m_Rotation.y * DEG2RAD);
@@ -112,8 +174,27 @@ Mat4 Transform::GetInverseMatrix() const
     Mat4 invRotation = invRotationX * invRotationY * invRotationZ;
 
     Mat4 invScale = Mat4::Scale(Vec3(1.0f / m_Scale.x, 1.0f / m_Scale.y, 1.0f / m_Scale.z));
+    Mat4 invTranslateToPivot = Mat4::Translate(m_Pivot);
 
-    return translateToPivot * invScale * invRotation * translateFromPivot * invTranslation;
+    // Inverse order: reverse of translateToPivot * scale * rotation * translateFromPivot * translation
+    return invTranslation * invTranslateFromPivot * invRotation * invScale * invTranslateToPivot;
+}
+
+void Transform::UpdateMatrix() const
+{
+    // Create transformation matrices
+    Mat4 translateToPivot = Mat4::Translate(-m_Pivot);
+    Mat4 scale = Mat4::Scale(m_Scale);
+
+    Mat4 rotationX = Mat4::RotateX(m_Rotation.x * DEG2RAD);
+    Mat4 rotationY = Mat4::RotateY(m_Rotation.y * DEG2RAD);
+    Mat4 rotationZ = Mat4::RotateZ(m_Rotation.z * DEG2RAD);
+    Mat4 rotation = rotationZ * rotationY * rotationX;
+
+    Mat4 translateFromPivot = Mat4::Translate(m_Pivot);
+    Mat4 translation = Mat4::Translate(m_Position);
+
+    m_CachedMatrix = translateToPivot * scale * rotation * translateFromPivot * translation;
 }
 
 void Transform::Reset()
@@ -124,22 +205,4 @@ void Transform::Reset()
     m_Pivot = Vec3(0.0f, 0.0f, 0.0f);
     m_MeshCenter = Vec3(0.0f, 0.0f, 0.0f);
     InvalidateMatrix();
-}
-
-void Transform::UpdateMatrix() const
-{
-    Mat4 scale = Mat4::Scale(m_Scale);
-
-    Mat4 rotationX = Mat4::RotateX(m_Rotation.x * DEG2RAD);
-    Mat4 rotationY = Mat4::RotateY(m_Rotation.y * DEG2RAD);
-    Mat4 rotationZ = Mat4::RotateZ(m_Rotation.z * DEG2RAD);
-    Mat4 rotation = rotationZ * rotationY * rotationX;
-
-    Vec3 absolutePivot = m_MeshCenter + m_Pivot;
-    Mat4 translateFromPivot = Mat4::Translate(Vec3(-absolutePivot.x, -absolutePivot.y, -absolutePivot.z));
-    Mat4 translateToPivot = Mat4::Translate(absolutePivot);
-
-    Mat4 translation = Mat4::Translate(m_Position);
-
-    m_CachedMatrix = translation * translateToPivot * rotation * scale * translateFromPivot;
 }

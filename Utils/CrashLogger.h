@@ -21,6 +21,7 @@ public:
 private:
     static std::string GetLogDirectory();
     static std::string GetTimestamp();
+    static void CreateLogFileIfNeeded();
     static void WriteLog(const std::string &message);
 
     static bool s_Initialized;

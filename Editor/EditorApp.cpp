@@ -11,10 +11,11 @@
 #include "EditorApp.h"
 #include "../Engine/Input/Input.h"
 #include "../Utils/ResourceManager.h"
+#include "../Utils/Workspace.h"
 #include "Components/Toolbar.h"
 #include "Components/Viewport/Viewport.h"
 #include "Components/Inspector.h"
-#include "Components/Assets.h"
+#include "Components/Assets/AssetsPanel.h"
 #include "Components/Console.h"
 #include "Components/Settings.h"
 #include "Components/Dockspace.h"
@@ -53,22 +54,19 @@ namespace Editor
         }
         ImGui::StyleColorsDark();
         ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 460");
-
-        // Initialize theme system
+        ImGui_ImplOpenGL3_Init("#version 460"); // Initialize theme system
         UI::ThemeManager::GetInstance().Initialize();
 
         // Initialize components
         m_Toolbar = std::make_unique<Components::Toolbar>();
         m_Viewport = std::make_unique<Components::Viewport>();
         m_Inspector = std::make_unique<Components::Inspector>();
-        m_Assets = std::make_unique<Components::Assets>();
-        m_Console = std::make_unique<Components::Console>();
+        m_Assets = std::make_unique<Assets::AssetsPanel>();
         m_Settings = std::make_unique<Components::Settings>(); // Register panels with default dock regions
         Components::Dockspace::RegisterPanel("Toolbar", m_Toolbar.get(), Components::Dockspace::Region::Top);
         Components::Dockspace::RegisterPanel("Inspector", m_Inspector.get(), Components::Dockspace::Region::Right);
         Components::Dockspace::RegisterPanel("Assets", m_Assets.get(), Components::Dockspace::Region::Bottom);
-        Components::Dockspace::RegisterPanel("Console", m_Console.get(), Components::Dockspace::Region::Bottom);
+        Components::Dockspace::RegisterPanel("Console", &Components::Console::GetInstance(), Components::Dockspace::Region::Bottom);
         Components::Dockspace::RegisterPanel("Settings", m_Settings.get(), Components::Dockspace::Region::Right);
         Components::Dockspace::RegisterPanel("Viewport", m_Viewport.get(), Components::Dockspace::Region::Center);
 
@@ -76,20 +74,39 @@ namespace Editor
         const auto layoutFile = std::filesystem::current_path() / "layout.ini";
 
         // Force reset the layout to fix any issues with docking
-        Components::Dockspace::Reset();
-
-        // Uncomment this if you want to use saved layouts in the future
+        Components::Dockspace::Reset(); // Uncomment this if you want to use saved layouts in the future
         if (std::filesystem::exists(layoutFile))
             Components::Dockspace::LoadLayout(layoutFile.string().c_str());
         else
             Components::Dockspace::Reset();
     }
-
     void EditorApp::RenderUI()
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        // Show workspace dialog on first frame
+        if (m_ShowWorkspaceDialogOnStartup && !m_WorkspaceInitialized)
+        {
+            UI::WorkspaceDialog::Show([this](const Workspace *workspace)
+                                      {
+                if (workspace) {
+                    m_CurrentWorkspace = std::make_shared<Workspace>(*workspace);
+                    Components::Console::PrintSuccess("Loaded workspace: " + workspace->name);
+                    Components::Console::Print("Workspace path: " + workspace->path.string());
+                } else {
+                    Components::Console::PrintWarning("No workspace selected. Using default workspace.");
+                }
+                m_WorkspaceInitialized = true; });
+            m_ShowWorkspaceDialogOnStartup = false;
+        }
+
+        // Render workspace dialog if it's open
+        if (UI::WorkspaceDialog::IsOpen())
+        {
+            UI::WorkspaceDialog::Render();
+        }
 
 #if defined(IMGUI_HAS_DOCK)             // Docking workspace
         Components::Dockspace::Begin(); // Draw all registered panels
@@ -99,7 +116,7 @@ namespace Editor
         if (m_AssetsVisible)
             m_Assets->Draw();
         if (m_ConsoleVisible)
-            m_Console->Draw();
+            Components::Console::GetInstance().Draw();
         if (m_SettingsVisible)
             m_Settings->Draw();
         if (m_ViewportVisible)
@@ -111,7 +128,7 @@ namespace Editor
         if (m_AssetsVisible)
             m_Assets->Draw();
         if (m_ConsoleVisible)
-            m_Console->Draw();
+            Components::Console::GetInstance().Draw();
         if (m_SettingsVisible)
             m_Settings->Draw();
         if (m_ViewportVisible)
@@ -125,19 +142,17 @@ namespace Editor
     }
 
     void EditorApp::Shutdown()
-    {
-        // Automatically save layout on exit
+    { // Automatically save layout on exit
         const char *layoutPath = (std::filesystem::current_path() / "layout.ini").string().c_str();
         Components::Dockspace::SaveLayout(layoutPath); // First destroy all components before ImGui cleanup
         // This ensures no component tries to use ImGui after it's destroyed
         m_Viewport.reset();
         m_Inspector.reset();
         m_Assets.reset();
-        m_Console.reset();
         m_Settings.reset();
         m_Toolbar.reset();
 
-        // Then clean up ImGui        ImGui_ImplOpenGL3_Shutdown();
+        // Then clean up ImGui
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 

@@ -58,12 +58,25 @@ public:
      */
     Vec3 GetCenter() const;
 
+    /**
+     * @brief Gets access to the vertex data for intersection testing.
+     * @return Const reference to the vertex data vector.
+     */
+    const std::vector<float> &GetVertices() const { return m_Vertices; }
+
+    /**
+     * @brief Gets access to the index data for intersection testing.
+     * @return Const reference to the index data vector.
+     */
+    const std::vector<unsigned int> &GetIndices() const { return m_Indices; }
+
 private:
     VertexArray m_VAO;  ///< Vertex Array Object managing the vertex attribute configurations.
     VertexBuffer m_VBO; ///< Vertex Buffer Object storing the vertex data.
     IndexBuffer m_IBO;  ///< Index Buffer Object storing the index data.
 
     std::vector<float> m_Vertices;           ///< Copy of vertex data for bounds calculation
+    std::vector<unsigned int> m_Indices;     ///< Copy of index data for intersection testing
     mutable Vec3 m_MinBounds, m_MaxBounds;   ///< Cached bounding box
     mutable bool m_BoundsCalculated = false; ///< Whether bounds have been calculated
 };

@@ -20,7 +20,15 @@ Mat4 PerspectiveCamera::GetProjectionMatrix() const
 
 Ray PerspectiveCamera::ScreenToWorldRay(float screenX, float screenY) const
 {
+    // Ensure viewport dimensions are valid
+    if (m_ViewportWidth <= 0.0f || m_ViewportHeight <= 0.0f)
+    {
+        // Fallback ray pointing forward
+        return Ray(m_Position, GetForward());
+    }
+
     // Convert screen coordinates to normalized device coordinates (-1 to 1)
+    // screenX and screenY are expected to be in viewport-relative coordinates (0 to viewport dimensions)
     float ndcX = (2.0f * screenX / m_ViewportWidth) - 1.0f;
     float ndcY = 1.0f - (2.0f * screenY / m_ViewportHeight);
 
