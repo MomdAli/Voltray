@@ -3,7 +3,7 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
-#include "../Math/vec3.h"
+#include "../Math/Vec3.h"
 #include <vector>
 
 /**
