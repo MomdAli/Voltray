@@ -1,12 +1,49 @@
-# Doxyfile minimal configuration for Voltray
+# Doxyfile configuration for Voltray with Doxygen Awesome CSS
 PROJECT_NAME           = Voltray
+PROJECT_BRIEF          = "Modern C++ Game Engine with Editor"
 OUTPUT_DIRECTORY       = docs
-HTML_OUTPUT            = .
+HTML_OUTPUT            = html
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 RECURSIVE              = YES
-INPUT                  = Engine Game Editor
+INPUT                  = Engine Editor Math Utils
 FILE_PATTERNS          = *.h *.cpp
 EXTRACT_ALL            = YES
 QUIET                  = YES
+
+# ========================================
+# Doxygen Awesome CSS - Voltray Theme
+# ========================================
+
+# Required Doxygen Awesome settings
 GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+HTML_COLORSTYLE        = LIGHT
+
+# Doxygen Awesome CSS files with Voltray custom theme
+HTML_EXTRA_STYLESHEET  = @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome.css \
+                         @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-sidebar-only.css \
+                         @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-sidebar-only-darkmode-toggle.css
+
+# Voltray custom colors (electric blue game engine theme)
+HTML_COLORSTYLE_HUE    = 200
+HTML_COLORSTYLE_SAT    = 255
+HTML_COLORSTYLE_GAMMA  = 80
+
+# Enhanced JavaScript features
+HTML_EXTRA_FILES       = @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-darkmode-toggle.js \
+                         @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-fragment-copy-button.js \
+                         @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-paragraph-link.js \
+                         @DOXYGEN_AWESOME_CSS_PATH@/doxygen-awesome-interactive-toc.js
+
+# Enhanced documentation features
+SEARCHENGINE           = YES
+SERVER_BASED_SEARCH    = NO
+GENERATE_DOCSET        = NO
+DOCSET_FEEDNAME        = "Voltray Documentation"
+
+# Clean branding with custom header for dark mode toggle
+PROJECT_LOGO           =
+HTML_HEADER            =
+HTML_FOOTER            =

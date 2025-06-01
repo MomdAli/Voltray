@@ -99,6 +99,20 @@ if(TARGET assimp)
     endif()
 endif()
 
+# Doxygen Awesome CSS (for documentation styling)
+FetchContent_Declare(
+    doxygen-awesome-css
+    URL https://github.com/jothepro/doxygen-awesome-css/archive/refs/heads/main.zip
+)
+FetchContent_MakeAvailable(doxygen-awesome-css)
+
+# Save the location where doxygen-awesome-css was downloaded
+FetchContent_GetProperties(doxygen-awesome-css)
+if(NOT doxygen-awesome-css_POPULATED)
+    FetchContent_Populate(doxygen-awesome-css)
+    set(DOXYGEN_AWESOME_CSS_DIR ${doxygen-awesome-css_SOURCE_DIR})
+endif()
+
 # Gather all source files from Engine, Editor, Math, and Utils (recursively, all .cpp and .h)
 file(GLOB_RECURSE VOLTRAY_SRC CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/Engine/*.cpp"
@@ -172,14 +186,35 @@ if(NOT WIN32)
     )
 endif()
 
+# Documentation with Doxygen and Awesome CSS
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
+    # Configure Doxyfile with Doxygen Awesome CSS paths
+    set(DOXYFILE_IN ${CMAKE_SOURCE_DIR}/Doxyfile)
+    set(DOXYFILE_OUT ${CMAKE_BINARY_DIR}/Doxyfile)    # Replace placeholder with actual path to Doxygen Awesome CSS
+    file(READ ${DOXYFILE_IN} DOXYFILE_CONTENT)
+    string(REPLACE "@DOXYGEN_AWESOME_CSS_PATH@" "${doxygen-awesome-css_SOURCE_DIR}" DOXYFILE_CONTENT "${DOXYFILE_CONTENT}")
+    string(REPLACE "@CMAKE_SOURCE_DIR@" "${CMAKE_SOURCE_DIR}" DOXYFILE_CONTENT "${DOXYFILE_CONTENT}")
+    file(WRITE ${DOXYFILE_OUT} ${DOXYFILE_CONTENT})    # Create documentation target
     add_custom_target(voltray-docs
-        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Doxyfile
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Generating API documentation with Doxygen"
+        COMMENT "Generating Voltray API documentation with custom theme"
         VERBATIM
+        DEPENDS ${DOXYFILE_OUT} ${CMAKE_SOURCE_DIR}/docs/header.html
     )
+
+    # Add a target to prepare docs for GitHub Pages (copies from docs/html to docs-github-pages)
+    add_custom_target(voltray-docs-pages
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_SOURCE_DIR}/docs-github-pages
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/docs/html ${CMAKE_SOURCE_DIR}/docs-github-pages
+        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_SOURCE_DIR}/docs-github-pages/.nojekyll
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Preparing documentation for GitHub Pages deployment"
+        DEPENDS voltray-docs
+    )
+
+    message(STATUS "Doxygen found. Documentation target 'voltray-docs' available with custom Voltray theme.")
 else()
     message(STATUS "Doxygen not found. Documentation target will not be available.")
 endif()
