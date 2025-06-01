@@ -163,6 +163,14 @@ list(APPEND ALL_HEADER_DIRS
 
 target_include_directories(Voltray PRIVATE ${ALL_HEADER_DIRS})
 
+# Add compiler options for main target
+if(NOT WIN32)
+    target_compile_options(Voltray PRIVATE
+        -Wno-macro-redefined
+        -Wno-unused-parameter
+        -Wno-format
+    )
+endif()
 
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
