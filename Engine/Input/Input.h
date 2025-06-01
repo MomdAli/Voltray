@@ -32,6 +32,9 @@ public:
     static GLFWwindow *s_Window;
     static void ResetMouseDelta();
 
+    static void HideCursor();
+    static void ShowCursor();
+
 private:
     static void ScrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 

@@ -33,10 +33,13 @@ cmake --build %BUILD_DIR% --target doc --config %BUILD_TYPE%
 
 REM === RUN THE ENGINE ===
 set EXE_PATH=%BUILD_DIR%\%BUILD_TYPE%\Voltray.exe
+set EXE_DIR=%BUILD_DIR%\%BUILD_TYPE%
 
 if exist "%EXE_PATH%" (
     echo Running Voltray...
-    "%EXE_PATH%"
+    pushd "%EXE_DIR%"
+    Voltray.exe
+    popd
 ) else (
     echo Error: Voltray.exe not found at %EXE_PATH%
 )

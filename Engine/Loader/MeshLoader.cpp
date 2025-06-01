@@ -1,17 +1,18 @@
 #include "MeshLoader.h"
+#include "../../Editor/Components/Console.h"
 #include "IFormatLoader.h"
-#include <iostream>
 #include <filesystem>
 #include <algorithm>
 
 using namespace Engine::Loader;
+using namespace Editor::Components;
 
 std::shared_ptr<Mesh> MeshLoader::LoadMesh(const std::string &filepath)
 {
     auto meshes = LoadMeshes(filepath);
     if (meshes.empty())
     {
-        std::cerr << "Failed to load any mesh from: " << filepath << std::endl;
+        Console::PrintError("Failed to load any mesh from: " + filepath);
         return nullptr;
     }
 
@@ -24,13 +25,13 @@ std::vector<std::shared_ptr<Mesh>> MeshLoader::LoadMeshes(const std::string &fil
 
     if (!std::filesystem::exists(filepath))
     {
-        std::cerr << "File does not exist: " << filepath << std::endl;
+        Console::PrintError("File does not exist: " + filepath);
         return meshes;
     }
 
     if (!IsFormatSupported(filepath))
     {
-        std::cerr << "Unsupported file format: " << filepath << std::endl;
+        Console::PrintError("Unsupported file format: " + filepath);
         return meshes;
     }
 
@@ -57,16 +58,16 @@ std::vector<MeshData> MeshLoader::LoadMeshData(const std::string &filepath)
 
         if (!loader)
         {
-            std::cerr << "No loader available for extension: " << extension << std::endl;
+            Console::PrintError("No loader available for extension: " + extension);
             return {};
         }
 
-        std::cout << "Using " << loader->GetLoaderName() << " for file: " << filepath << std::endl;
+        Console::Print("Using " + loader->GetLoaderName() + " for file: " + filepath);
         return loader->LoadMeshData(filepath);
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error loading mesh: " << e.what() << std::endl;
+        Console::PrintError("Error loading mesh: " + std::string(e.what()));
         return {};
     }
 }
@@ -174,10 +175,7 @@ std::vector<std::shared_ptr<IFormatLoader>> MeshLoader::GetAllLoaders()
     // Initialize loaders only once
     if (loaders.empty())
     {
-        // Add OBJ loader (lightweight, specific implementation)
-        loaders.push_back(std::make_shared<OBJLoader>());
-
-        // Add Assimp loader (comprehensive, handles most formats)
+        // Add Assimp loader (comprehensive, handles all formats including OBJ)
         loaders.push_back(std::make_shared<AssimpLoader>());
     }
 

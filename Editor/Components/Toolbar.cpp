@@ -1,4 +1,7 @@
 #include "Toolbar.h"
+#include "../EditorApp.h"
+
+#include <glad/gl.h>
 #include <imgui.h>
 
 namespace Editor::Components
@@ -28,7 +31,19 @@ namespace Editor::Components
             }
             if (ImGui::BeginMenu("View"))
             {
+                // Get EditorApp instance to access panel visibility flags
+                auto *editorApp = ::Editor::EditorApp::Get();
+                if (editorApp)
+                {
+                    ImGui::MenuItem("Viewport", nullptr, &editorApp->GetViewportVisible());
+                    ImGui::MenuItem("Inspector", nullptr, &editorApp->GetInspectorVisible());
+                    ImGui::MenuItem("Assets", nullptr, &editorApp->GetAssetsVisible());
+                    ImGui::MenuItem("Console", nullptr, &editorApp->GetConsoleVisible());
+                    ImGui::MenuItem("Settings", nullptr, &editorApp->GetSettingsVisible());
+                    ImGui::Separator();
+                }
                 ImGui::MenuItem("Reset Layout");
+
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Help"))

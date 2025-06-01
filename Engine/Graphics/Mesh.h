@@ -3,6 +3,7 @@
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "../Math/Vec3.h"
 #include <vector>
 
 /**
@@ -38,18 +39,44 @@ public:
      * if the underlying VertexArray, VertexBuffer, and IndexBuffer
      * classes manage their own resource deallocation.
      */
-    ~Mesh();
+    ~Mesh();           /**
+                        * @brief Renders the mesh.
+                        *
+                        * This method binds the associated Vertex Array Object and issues a draw call
+                        * using the Index Buffer Object.
+                        */
+    void Draw() const; /**
+                        * @brief Gets the axis-aligned bounding box of the mesh.
+                        * @param minBounds Output minimum bounds of the mesh.
+                        * @param maxBounds Output maximum bounds of the mesh.
+                        */
+    void GetBounds(Vec3 &minBounds, Vec3 &maxBounds) const;
 
     /**
-     * @brief Renders the mesh.
-     *
-     * This method binds the associated Vertex Array Object and issues a draw call
-     * using the Index Buffer Object.
+     * @brief Gets the center point of the mesh bounds.
+     * @return The center point of the mesh.
      */
-    void Draw() const;
+    Vec3 GetCenter() const;
+
+    /**
+     * @brief Gets access to the vertex data for intersection testing.
+     * @return Const reference to the vertex data vector.
+     */
+    const std::vector<float> &GetVertices() const { return m_Vertices; }
+
+    /**
+     * @brief Gets access to the index data for intersection testing.
+     * @return Const reference to the index data vector.
+     */
+    const std::vector<unsigned int> &GetIndices() const { return m_Indices; }
 
 private:
     VertexArray m_VAO;  ///< Vertex Array Object managing the vertex attribute configurations.
     VertexBuffer m_VBO; ///< Vertex Buffer Object storing the vertex data.
     IndexBuffer m_IBO;  ///< Index Buffer Object storing the index data.
+
+    std::vector<float> m_Vertices;           ///< Copy of vertex data for bounds calculation
+    std::vector<unsigned int> m_Indices;     ///< Copy of index data for intersection testing
+    mutable Vec3 m_MinBounds, m_MaxBounds;   ///< Cached bounding box
+    mutable bool m_BoundsCalculated = false; ///< Whether bounds have been calculated
 };

@@ -1,12 +1,17 @@
 #pragma once
+
 #include <memory>
 #include <GLFW/glfw3.h>
+
 #include "Components/Toolbar.h"
-#include "Components/Viewport.h"
+#include "Components/Viewport/Viewport.h"
 #include "Components/Inspector.h"
-#include "Components/Assets.h"
+#include "Components/Assets/AssetsPanel.h"
 #include "Components/Console.h"
+#include "Components/Settings.h"
 #include "Components/Dockspace.h"
+#include "UI/WorkspaceDialog.h"
+#include "../Utils/Workspace.h"
 
 /**
  * @file EditorApp.h
@@ -61,12 +66,48 @@ namespace Editor
          */
         static EditorApp *Get();
 
+        /**
+         * @brief Get panel visibility flags for menu toggles
+         */
+        bool &GetViewportVisible() { return m_ViewportVisible; }
+        bool &GetInspectorVisible() { return m_InspectorVisible; }
+        bool &GetAssetsVisible() { return m_AssetsVisible; }
+        bool &GetConsoleVisible() { return m_ConsoleVisible; }
+        bool &GetSettingsVisible() { return m_SettingsVisible; } /**
+                                                                  * @brief Get the viewport component
+                                                                  * @return Pointer to the viewport component
+                                                                  */
+        Components::Viewport *GetViewport() { return m_Viewport.get(); }
+
+        /**
+         * @brief Get the settings component
+         * @return Pointer to the settings component
+         */
+        Components::Settings *GetSettings() { return m_Settings.get(); }
+
+        /**
+         * @brief Get the current workspace
+         * @return Shared pointer to the current workspace, or nullptr if none selected
+         */
+        std::shared_ptr<Workspace> GetCurrentWorkspace() { return m_CurrentWorkspace; }
+
     private:
         std::unique_ptr<Components::Toolbar> m_Toolbar;
         std::unique_ptr<Components::Viewport> m_Viewport;
         std::unique_ptr<Components::Inspector> m_Inspector;
-        std::unique_ptr<Components::Assets> m_Assets;
-        std::unique_ptr<Components::Console> m_Console;
+        std::unique_ptr<Assets::AssetsPanel> m_Assets;
+        std::unique_ptr<Components::Settings> m_Settings;
+
+        // Panel visibility flags
+        bool m_ViewportVisible = true;
+        bool m_InspectorVisible = true;
+        bool m_AssetsVisible = true;
+        bool m_ConsoleVisible = true;
+        bool m_SettingsVisible = true; // Workspace management
+        bool m_WorkspaceInitialized = false;
+        bool m_ShowWorkspaceDialogOnStartup = true;
+        std::shared_ptr<Workspace> m_CurrentWorkspace;
+
         static EditorApp *s_Instance;
     };
 }

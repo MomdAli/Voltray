@@ -47,25 +47,11 @@ namespace Engine::Loader
          * @return Loader name for debugging
          */
         virtual std::string GetLoaderName() const = 0;
-    };
-
-    /**
-     * @class OBJLoader
-     * @brief Loader for Wavefront OBJ files
-     */
-    class OBJLoader : public IFormatLoader
-    {
-    public:
-        bool CanLoad(const std::string &extension) const override;
-        std::vector<MeshData> LoadMeshData(const std::string &filepath) override;
-        std::string GetLoaderName() const override { return "OBJ Loader"; }
-    };
-
-    /**
-     * @class AssimpLoader
-     * @brief Loader using Assimp library for multiple formats
-     * Supports: FBX, GLTF, GLB, 3DS, DAE, PLY, STL, X3D, and many more
-     */
+    }; /**
+        * @class AssimpLoader
+        * @brief Loader using Assimp library for multiple formats
+        * Supports: FBX, GLTF, GLB, 3DS, DAE, PLY, STL, X3D, OBJ, and many more
+        */
     class AssimpLoader : public IFormatLoader
     {
     public:

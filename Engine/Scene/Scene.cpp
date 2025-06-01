@@ -77,8 +77,12 @@ void Scene::Update(float deltaTime)
     }
 }
 
-void Scene::Render(Renderer &renderer, const Camera &camera, Shader &shader)
+void Scene::Render(Renderer &renderer, const BaseCamera &camera, Shader &shader)
 {
+    // Set the camera view-projection matrix for all objects
+    shader.Bind();
+    shader.SetUniformMat4("u_ViewProjection", camera.GetViewProjectionMatrix().data);
+
     for (auto &object : m_Objects)
     {
         if (object && object->IsVisible() && object->GetMesh())
@@ -88,7 +92,44 @@ void Scene::Render(Renderer &renderer, const Camera &camera, Shader &shader)
 
             // Get the model matrix and render the object
             Mat4 modelMatrix = object->GetModelMatrix();
+            shader.SetUniformMat4("u_Model", modelMatrix.data);
+
             renderer.Draw(*object->GetMesh(), shader, modelMatrix);
         }
     }
+}
+
+void Scene::SelectObject(std::shared_ptr<SceneObject> object)
+{
+    // Clear all selections first
+    ClearSelection();
+
+    // Select the specified object if it exists in the scene
+    if (object && std::find(m_Objects.begin(), m_Objects.end(), object) != m_Objects.end())
+    {
+        object->SetSelected(true);
+    }
+}
+
+void Scene::ClearSelection()
+{
+    for (auto &obj : m_Objects)
+    {
+        if (obj)
+        {
+            obj->SetSelected(false);
+        }
+    }
+}
+
+std::shared_ptr<SceneObject> Scene::GetSelectedObject() const
+{
+    for (auto &obj : m_Objects)
+    {
+        if (obj && obj->IsSelected())
+        {
+            return obj;
+        }
+    }
+    return nullptr;
 }

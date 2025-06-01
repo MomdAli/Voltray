@@ -46,18 +46,40 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(imgui)
 
-# Assimp (for mesh loading)
+# Assimp (for mesh loading) - Optimized for faster builds
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable Assimp tests")
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "Disable Assimp tools")
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "Disable Assimp samples")
+set(ASSIMP_INSTALL OFF CACHE BOOL "Disable Assimp install")
+set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "Disable warnings as errors for Assimp")
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable all exporters to speed up build")
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "Build zlib from source")
+set(BUILD_TESTING OFF CACHE BOOL "Disable testing")
+set(ASSIMP_UNIT_TESTS OFF CACHE BOOL "Disable unit tests")
+set(ASSIMP_HUNTER_ENABLED OFF CACHE BOOL "Disable Hunter package manager")
+
+# Disable unnecessary importers to speed up build (keep only commonly used ones)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "Disable all importers by default")
+set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "Enable OBJ importer")
+set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "Enable FBX importer")
+set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "Enable GLTF importer")
+set(ASSIMP_BUILD_COLLADA_IMPORTER ON CACHE BOOL "Enable COLLADA importer")
+set(ASSIMP_BUILD_PLY_IMPORTER ON CACHE BOOL "Enable PLY importer")
+
 FetchContent_Declare(
   assimp
   GIT_REPOSITORY https://github.com/assimp/assimp.git
   GIT_TAG        v5.3.1  # Use a more stable version
 )
-set(ASSIMP_BUILD_TESTS OFF)
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-set(ASSIMP_BUILD_SAMPLES OFF)
-set(ASSIMP_INSTALL OFF)
-set(ASSIMP_WARNINGS_AS_ERRORS OFF)  # Disable warnings as errors for Assimp
 FetchContent_MakeAvailable(assimp)
+
+# nlohmann/json (for workspace management)
+FetchContent_Declare(
+  nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG        v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
 
 # Apply platform-specific fixes for Assimp compilation issues
 if(TARGET assimp)
@@ -66,17 +88,27 @@ if(TARGET assimp)
         target_compile_options(assimp PRIVATE -Wno-deprecated-copy)
     endif()
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        # Fix Linux implicit-fallthrough warnings
-        target_compile_options(assimp PRIVATE -Wno-implicit-fallthrough)
+        # Fix Linux implicit-fallthrough warnings and array-bounds issues in GCC 13+
+        target_compile_options(assimp PRIVATE
+            -Wno-implicit-fallthrough
+            -Wno-array-bounds
+            -Wno-error=array-bounds
+            -Wno-stringop-overflow
+            -Wno-error=stringop-overflow
+        )
     endif()
 endif()
 
-# Gather all source files from Engine and Editor (recursively, all .cpp and .h)
+# Gather all source files from Engine, Editor, Math, and Utils (recursively, all .cpp and .h)
 file(GLOB_RECURSE VOLTRAY_SRC CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/Engine/*.cpp"
     "${CMAKE_SOURCE_DIR}/Engine/*.h"
     "${CMAKE_SOURCE_DIR}/Editor/*.cpp"
     "${CMAKE_SOURCE_DIR}/Editor/*.h"
+    "${CMAKE_SOURCE_DIR}/Math/*.cpp"
+    "${CMAKE_SOURCE_DIR}/Math/*.h"
+    "${CMAKE_SOURCE_DIR}/Utils/*.cpp"
+    "${CMAKE_SOURCE_DIR}/Utils/*.h"
 )
 
 # Add Main.cpp from project root
@@ -101,20 +133,22 @@ add_executable(Voltray ${VOLTRAY_SRC} ${IMGUI_SOURCES} ${CMAKE_SOURCE_DIR}/Vendo
 find_package(OpenGL REQUIRED)
 
 # Link GLFW and OpenGL to the Voltray executable
-target_link_libraries(Voltray PRIVATE glfw OpenGL::GL assimp)
+target_link_libraries(Voltray PRIVATE glfw OpenGL::GL assimp nlohmann_json::nlohmann_json)
 
-# Collect all header directories from Engine and Editor recursively
+# Collect all header directories from Engine, Editor, Math, and Utils recursively
 file(GLOB_RECURSE ENGINE_HEADERS "${CMAKE_SOURCE_DIR}/Engine/*.h")
 file(GLOB_RECURSE EDITOR_HEADERS "${CMAKE_SOURCE_DIR}/Editor/*.h")
+file(GLOB_RECURSE MATH_HEADERS "${CMAKE_SOURCE_DIR}/Math/*.h")
+file(GLOB_RECURSE UTILS_HEADERS "${CMAKE_SOURCE_DIR}/Utils/*.h")
 
 set(ALL_HEADER_DIRS "")
-foreach(header ${ENGINE_HEADERS} ${EDITOR_HEADERS})
+foreach(header ${ENGINE_HEADERS} ${EDITOR_HEADERS} ${MATH_HEADERS} ${UTILS_HEADERS})
     get_filename_component(dir ${header} DIRECTORY)
     list(APPEND ALL_HEADER_DIRS ${dir})
 endforeach()
 list(REMOVE_DUPLICATES ALL_HEADER_DIRS)
 
-# Add ImGui, glad, glfw, assimp, and root Engine/Editor include dirs
+# Add ImGui, glad, glfw, assimp, and root directories
 list(APPEND ALL_HEADER_DIRS
     ${CMAKE_SOURCE_DIR}/Vendor/glad/include
     ${glfw_SOURCE_DIR}/include
@@ -123,10 +157,20 @@ list(APPEND ALL_HEADER_DIRS
     ${assimp_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/Engine
     ${CMAKE_SOURCE_DIR}/Editor
+    ${CMAKE_SOURCE_DIR}/Math
+    ${CMAKE_SOURCE_DIR}/Utils
 )
 
 target_include_directories(Voltray PRIVATE ${ALL_HEADER_DIRS})
 
+# Add compiler options for main target
+if(NOT WIN32)
+    target_compile_options(Voltray PRIVATE
+        -Wno-macro-redefined
+        -Wno-unused-parameter
+        -Wno-format
+    )
+endif()
 
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
