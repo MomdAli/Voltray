@@ -5,23 +5,17 @@ add_subdirectory(Camera)
 
 # Create the main Graphics library
 add_library(VoltrayEngineGraphics STATIC
-    IndexBuffer.cpp
-    IndexBuffer.h
-    Mesh.cpp
-    Mesh.h
-    Renderer.cpp
-    Renderer.h
-    Shader.cpp
-    Shader.h
-    VertexArray.cpp
-    VertexArray.h
-    VertexBuffer.cpp
-    VertexBuffer.h
+    Private/IndexBuffer.cpp
+    Private/Mesh.cpp
+    Private/Renderer.cpp
+    Private/Shader.cpp
+    Private/VertexArray.cpp
+    Private/VertexBuffer.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEngineGraphics PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/Vendor/glad/include
     ${glfw_SOURCE_DIR}/include

@@ -1,13 +1,13 @@
 # Engine Input module CMakeLists.txt
 add_library(VoltrayEngineInput STATIC
-    Input.cpp
-    Input.h
+    Private/Input.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEngineInput PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/Vendor/glad/include
     ${glfw_SOURCE_DIR}/include
 )
 

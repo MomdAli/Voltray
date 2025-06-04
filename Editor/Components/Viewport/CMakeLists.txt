@@ -1,20 +1,15 @@
 # Editor Components Viewport module CMakeLists.txt
 add_library(VoltrayEditorComponentsViewport STATIC
-    Viewport.cpp
-    Viewport.h
-    ViewportFramebuffer.cpp
-    ViewportFramebuffer.h
-    ViewportInput.cpp
-    ViewportInput.h
-    ViewportRenderer.cpp
-    ViewportRenderer.h
-    ViewportScene.cpp
-    ViewportScene.h
+    Private/Viewport.cpp
+    Private/ViewportFramebuffer.cpp
+    Private/ViewportInput.cpp
+    Private/ViewportRenderer.cpp
+    Private/ViewportScene.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEditorComponentsViewport PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/Vendor/glad/include
     ${IMGUI_DIR}

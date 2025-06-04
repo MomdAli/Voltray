@@ -1,14 +1,12 @@
 # Editor Components Assets Utils module CMakeLists.txt
 add_library(VoltrayEditorComponentsAssetsUtils STATIC
-    FileOperations.cpp
-    FileOperations.h
-    IconRenderer.cpp
-    IconRenderer.h
+    Private/FileOperations.cpp
+    Private/IconRenderer.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEditorComponentsAssetsUtils PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}
@@ -18,6 +16,7 @@ target_include_directories(VoltrayEditorComponentsAssetsUtils PUBLIC
 target_link_libraries(VoltrayEditorComponentsAssetsUtils PUBLIC
     VoltrayMath
     VoltrayUtils
+    VoltrayEditorComponentsAssetsCore
 )
 
 # Alias for consistent naming

@@ -1,10 +1,13 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
-#include "Editor/EditorApp.h"
-#include "Utils/ResourceManager.h"
-#include "Utils/CrashLogger.h"
-#include "Utils/UserDataManager.h"
-#include "Utils/Workspace.h"
+#include "EditorApp.h"
+#include "ResourceManager.h"
+#include "CrashLogger.h"
+#include "UserDataManager.h"
+#include "Workspace.h"
+
+using namespace Voltray::Utils;
+using Voltray::Editor::EditorApp;
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -27,33 +30,29 @@ int main()
     try
     {
         if (!glfwInit())
-            return -1;
-
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            return -1;        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         GLFWmonitor *monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 
-        // Configure for windowed fullscreen (borderless windowed)
+        // Start in windowed mode with reasonable size
         glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE); // Start maximized instead of fake fullscreen
 
-        GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "Voltray Editor", nullptr, nullptr);
-        if (!window)
+        GLFWwindow *window = glfwCreateWindow(1280, 720, "Voltray Editor", nullptr, nullptr);        if (!window)
         {
             glfwTerminate();
             return -1;
         }
 
-        // Set window position to top-left corner
-        glfwSetWindowPos(window, 0, 0); // Optional: Add F11 key callback to toggle fullscreen modes
-        glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods)
-                           {
+        // Add F11 key callback to toggle fullscreen modes
+        glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods)                           {
             (void)scancode; // Suppress unused parameter warning
             (void)mods;     // Suppress unused parameter warning
             if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
-                static bool isFullscreen = true;
+                static bool isFullscreen = false; // Start in windowed mode
                 GLFWmonitor* monitor = glfwGetPrimaryMonitor();
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -90,9 +89,7 @@ int main()
             glfwDestroyWindow(window);
             glfwTerminate();
             return -1;
-        }
-
-        // Initialize ResourceManager
+        } // Initialize ResourceManager
 #ifdef _WIN32
         char exePath[MAX_PATH];
         GetModuleFileNameA(nullptr, exePath, MAX_PATH);
@@ -104,7 +101,7 @@ int main()
 #endif
 
         // Initialize and run editor
-        Editor::EditorApp editor;
+        EditorApp editor;
         editor.Init(window);
 
         while (!glfwWindowShouldClose(window))

@@ -122,9 +122,11 @@ set(IMGUI_SOURCES
     ${IMGUI_DIR}/imgui_tables.cpp
     ${IMGUI_DIR}/imgui_widgets.cpp
     ${IMGUI_DIR}/imgui_demo.cpp
-    ${IMGUI_BACKEND_DIR}/imgui_impl_glfw.cpp
-    ${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp
+    ${IMGUI_BACKEND_DIR}/imgui_impl_glfw.cpp    ${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp
 )
+
+# Find OpenGL before adding subdirectories that need it
+find_package(OpenGL REQUIRED)
 
 # Add subdirectories in order of dependencies
 add_subdirectory(Math)
@@ -133,24 +135,21 @@ add_subdirectory(Engine)
 add_subdirectory(Editor)
 
 # Create the main executable
-add_executable(Voltray 
+add_executable(Voltray
     Main.cpp
-    ${IMGUI_SOURCES} 
+    ${IMGUI_SOURCES}
     ${CMAKE_SOURCE_DIR}/Vendor/glad/src/gl.c
 )
 
-# After including dependencies, find OpenGL
-find_package(OpenGL REQUIRED)
-
 # Link all libraries to the main executable
-target_link_libraries(Voltray PRIVATE 
+target_link_libraries(Voltray PRIVATE
     VoltrayMath
     VoltrayUtils
     VoltrayEngine
     VoltrayEditor
-    glfw 
-    OpenGL::GL 
-    assimp 
+    glfw
+    OpenGL::GL
+    assimp
     nlohmann_json::nlohmann_json
 )
 

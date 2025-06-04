@@ -1,12 +1,11 @@
 # Editor Components Assets DragDrop module CMakeLists.txt
 add_library(VoltrayEditorComponentsAssetsDragDrop STATIC
-    AssetDragDrop.cpp
-    AssetDragDrop.h
+    Private/AssetDragDrop.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEditorComponentsAssetsDragDrop PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}
@@ -16,6 +15,7 @@ target_include_directories(VoltrayEditorComponentsAssetsDragDrop PUBLIC
 target_link_libraries(VoltrayEditorComponentsAssetsDragDrop PUBLIC
     VoltrayMath
     VoltrayUtils
+    VoltrayEditor
 )
 
 # Alias for consistent naming

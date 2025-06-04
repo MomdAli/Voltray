@@ -8,15 +8,13 @@ add_subdirectory(Utils)
 
 # Create the main Assets library
 add_library(VoltrayEditorComponentsAssets STATIC
-    Assets.cpp
-    Assets.h
-    AssetsPanel.cpp
-    AssetsPanel.h
+    Private/Assets.cpp
+    Private/AssetsPanel.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEditorComponentsAssets PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}

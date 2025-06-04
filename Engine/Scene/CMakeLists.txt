@@ -1,18 +1,14 @@
 # Engine Scene module CMakeLists.txt
 add_library(VoltrayEngineScene STATIC
-    PrimitiveGenerator.cpp
-    PrimitiveGenerator.h
-    Scene.cpp
-    Scene.h
-    SceneObject.cpp
-    SceneObject.h
-    SceneObjectFactory.cpp
-    SceneObjectFactory.h
+    Private/PrimitiveGenerator.cpp
+    Private/Scene.cpp
+    Private/SceneObject.cpp
+    Private/SceneObjectFactory.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEngineScene PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
 )
 
@@ -20,6 +16,8 @@ target_include_directories(VoltrayEngineScene PUBLIC
 target_link_libraries(VoltrayEngineScene PUBLIC
     VoltrayMath
     VoltrayUtils
+    VoltrayEngineGraphics
+    VoltrayEngineLoader
 )
 
 # Alias for consistent naming

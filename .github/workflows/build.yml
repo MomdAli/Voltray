@@ -105,50 +105,11 @@ jobs:
         cp Voltray Voltray-linux/
         cp -R ../Shaders Voltray-linux/
         tar -czvf Voltray-linux.tar.gz Voltray-linux
-
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Voltray-Linux
         path: ${{ env.BUILD_DIR }}/Voltray-linux.tar.gz
-
-  docs-build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Install Doxygen
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y doxygen graphviz libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-common-dev
-
-    - name: Build documentation
-      run: |
-        cmake -B ${{ env.BUILD_DIR }}
-        cmake --build ${{ env.BUILD_DIR }} --target voltray-docs
-
-    - name: Upload docs
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: docs/
-
-  # Deploy docs to GitHub Pages when pushing to main/master
-  deploy-docs:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    needs: docs-build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
 
   release:
     if: startsWith(github.ref, 'refs/tags/')

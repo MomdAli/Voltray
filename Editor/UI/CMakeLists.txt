@@ -5,19 +5,15 @@ add_subdirectory(Panels)
 
 # Create the main UI library
 add_library(VoltrayEditorUI STATIC
-    Panel.cpp
-    Panel.h
-    Theme.cpp
-    Theme.h
-    UI.cpp
-    UI.h
-    WorkspaceDialog.cpp
-    WorkspaceDialog.h
+    Private/Panel.cpp
+    Private/Theme.cpp
+    Private/UI.cpp
+    Private/WorkspaceDialog.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEditorUI PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}

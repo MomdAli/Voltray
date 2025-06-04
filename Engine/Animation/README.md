@@ -68,7 +68,7 @@ float custom = Animation::AnimationUtil::Lerp(0.0f, 100.0f, 0.5f, customEasing);
 ### Using with MathUtil
 
 ```cpp
-#include "Math/MathUtil.h"
+#include "MathUtil.h"
 
 // Basic lerp (unchanged)
 float basic = MathUtil::Lerp(10.0f, 20.0f, 0.3f);

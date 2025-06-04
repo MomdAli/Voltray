@@ -1,16 +1,13 @@
 # Editor Components Assets UI module CMakeLists.txt
 add_library(VoltrayEditorComponentsAssetsUI STATIC
-    AssetBrowser.cpp
-    AssetBrowser.h
-    ContextMenu.cpp
-    ContextMenu.h
-    NavigationBar.cpp
-    NavigationBar.h
+    Private/AssetBrowser.cpp
+    Private/ContextMenu.cpp
+    Private/NavigationBar.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEditorComponentsAssetsUI PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}
@@ -20,6 +17,8 @@ target_include_directories(VoltrayEditorComponentsAssetsUI PUBLIC
 target_link_libraries(VoltrayEditorComponentsAssetsUI PUBLIC
     VoltrayMath
     VoltrayUtils
+    VoltrayEditorComponentsAssetsCore
+    VoltrayEditorComponentsAssetsDragDrop
 )
 
 # Alias for consistent naming

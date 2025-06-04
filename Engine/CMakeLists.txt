@@ -20,7 +20,6 @@ target_link_libraries(VoltrayEngine INTERFACE
     VoltrayEngineLoader
     VoltrayEngineScene
     VoltrayEngineGraphics
-    VoltrayAnimation
 )
 
 # Set include directories for this library

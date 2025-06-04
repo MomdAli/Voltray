@@ -6,21 +6,16 @@ add_subdirectory(Viewport)
 
 # Create the main Components library
 add_library(VoltrayEditorComponents STATIC
-    Console.cpp
-    Console.h
-    Dockspace.cpp
-    Dockspace.h
-    Inspector.cpp
-    Inspector.h
-    Settings.cpp
-    Settings.h
-    Toolbar.cpp
-    Toolbar.h
+    Private/Console.cpp
+    Private/Dockspace.cpp
+    Private/Inspector.cpp
+    Private/Settings.cpp
+    Private/Toolbar.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEditorComponents PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}

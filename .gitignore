@@ -5,6 +5,9 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 
+# Generated documentation (handled by GitHub Actions)
+docs/
+
 # Logs and debug files
 logs/
 *.log
@@ -39,6 +42,3 @@ resource_debug_output.txt
 # OS files
 .DS_Store
 Thumbs.db
-
-# Privates
-Private/

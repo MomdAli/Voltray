@@ -1,12 +1,11 @@
 # Engine Config module CMakeLists.txt
 add_library(VoltrayEngineConfig STATIC
-    EngineSettings.cpp
-    EngineSettings.h
+    Private/EngineSettings.cpp
 )
 
 # Set include directories for this library
 target_include_directories(VoltrayEngineConfig PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    Public
     ${CMAKE_SOURCE_DIR}
 )
 
