@@ -39,3 +39,6 @@ resource_debug_output.txt
 # OS files
 .DS_Store
 Thumbs.db
+
+# Privates
+Private/

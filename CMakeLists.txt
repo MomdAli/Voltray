@@ -113,22 +113,7 @@ if(NOT doxygen-awesome-css_POPULATED)
     set(DOXYGEN_AWESOME_CSS_DIR ${doxygen-awesome-css_SOURCE_DIR})
 endif()
 
-# Gather all source files from Engine, Editor, Math, and Utils (recursively, all .cpp and .h)
-file(GLOB_RECURSE VOLTRAY_SRC CONFIGURE_DEPENDS
-    "${CMAKE_SOURCE_DIR}/Engine/*.cpp"
-    "${CMAKE_SOURCE_DIR}/Engine/*.h"
-    "${CMAKE_SOURCE_DIR}/Editor/*.cpp"
-    "${CMAKE_SOURCE_DIR}/Editor/*.h"
-    "${CMAKE_SOURCE_DIR}/Math/*.cpp"
-    "${CMAKE_SOURCE_DIR}/Math/*.h"
-    "${CMAKE_SOURCE_DIR}/Utils/*.cpp"
-    "${CMAKE_SOURCE_DIR}/Utils/*.h"
-)
-
-# Add Main.cpp from project root
-list(APPEND VOLTRAY_SRC ${CMAKE_SOURCE_DIR}/Main.cpp)
-
-# ImGui sources (use FetchContent's imgui_SOURCE_DIR)
+# Setup ImGui sources
 set(IMGUI_DIR ${imgui_SOURCE_DIR})
 set(IMGUI_BACKEND_DIR ${IMGUI_DIR}/backends)
 set(IMGUI_SOURCES
@@ -141,41 +126,43 @@ set(IMGUI_SOURCES
     ${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp
 )
 
-add_executable(Voltray ${VOLTRAY_SRC} ${IMGUI_SOURCES} ${CMAKE_SOURCE_DIR}/Vendor/glad/src/gl.c)
+# Add subdirectories in order of dependencies
+add_subdirectory(Math)
+add_subdirectory(Utils)
+add_subdirectory(Engine)
+add_subdirectory(Editor)
+
+# Create the main executable
+add_executable(Voltray 
+    Main.cpp
+    ${IMGUI_SOURCES} 
+    ${CMAKE_SOURCE_DIR}/Vendor/glad/src/gl.c
+)
 
 # After including dependencies, find OpenGL
 find_package(OpenGL REQUIRED)
 
-# Link GLFW and OpenGL to the Voltray executable
-target_link_libraries(Voltray PRIVATE glfw OpenGL::GL assimp nlohmann_json::nlohmann_json)
+# Link all libraries to the main executable
+target_link_libraries(Voltray PRIVATE 
+    VoltrayMath
+    VoltrayUtils
+    VoltrayEngine
+    VoltrayEditor
+    glfw 
+    OpenGL::GL 
+    assimp 
+    nlohmann_json::nlohmann_json
+)
 
-# Collect all header directories from Engine, Editor, Math, and Utils recursively
-file(GLOB_RECURSE ENGINE_HEADERS "${CMAKE_SOURCE_DIR}/Engine/*.h")
-file(GLOB_RECURSE EDITOR_HEADERS "${CMAKE_SOURCE_DIR}/Editor/*.h")
-file(GLOB_RECURSE MATH_HEADERS "${CMAKE_SOURCE_DIR}/Math/*.h")
-file(GLOB_RECURSE UTILS_HEADERS "${CMAKE_SOURCE_DIR}/Utils/*.h")
-
-set(ALL_HEADER_DIRS "")
-foreach(header ${ENGINE_HEADERS} ${EDITOR_HEADERS} ${MATH_HEADERS} ${UTILS_HEADERS})
-    get_filename_component(dir ${header} DIRECTORY)
-    list(APPEND ALL_HEADER_DIRS ${dir})
-endforeach()
-list(REMOVE_DUPLICATES ALL_HEADER_DIRS)
-
-# Add ImGui, glad, glfw, assimp, and root directories
-list(APPEND ALL_HEADER_DIRS
+# Setup include directories for the main executable
+target_include_directories(Voltray PRIVATE
+    ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/Vendor/glad/include
     ${glfw_SOURCE_DIR}/include
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}
     ${assimp_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/Engine
-    ${CMAKE_SOURCE_DIR}/Editor
-    ${CMAKE_SOURCE_DIR}/Math
-    ${CMAKE_SOURCE_DIR}/Utils
 )
-
-target_include_directories(Voltray PRIVATE ${ALL_HEADER_DIRS})
 
 # Add compiler options for main target
 if(NOT WIN32)

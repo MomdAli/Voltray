@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Engine/Animation/Animation.h"
+
 #define M_PI 3.141592653589793238467932384626433f   // Pi constant
 #define M_PI_2 1.570796326794896619231321691639751f // Pi / 2
 #define DEG2RAD 0.01745329251994329576923690768489f // Pi / 180.0f
@@ -16,13 +18,25 @@ namespace MathUtil
         if (value > max)
             return max;
         return value;
-    }
-
-    // Linear interpolation
+    } // Linear interpolation (basic version)
     template <typename T>
     T Lerp(const T &a, const T &b, float t)
     {
         return a + (b - a) * t;
+    }
+
+    // Linear interpolation with easing support
+    template <typename T>
+    T Lerp(const T &a, const T &b, float t, Animation::EasingType easingType)
+    {
+        return Animation::AnimationUtil::Lerp(a, b, t, easingType);
+    }
+
+    // Linear interpolation with custom easing function
+    template <typename T>
+    T Lerp(const T &a, const T &b, float t, Animation::EasingFunction easingFunction)
+    {
+        return Animation::AnimationUtil::Lerp(a, b, t, easingFunction);
     }
 
     // Map a value from one range to another
