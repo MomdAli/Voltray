@@ -18,6 +18,27 @@ namespace Voltray::Editor::Components
                 ImGui::MenuItem("Open...");
                 ImGui::MenuItem("Save");
                 ImGui::Separator();
+
+                // Scene management
+                if (ImGui::MenuItem("Save Scene"))
+                {
+                    auto *editorApp = EditorApp::Get();
+                    if (editorApp && editorApp->GetViewport())
+                    {
+                        editorApp->GetViewport()->GetScene().SaveScene("scene.json");
+                    }
+                }
+
+                if (ImGui::MenuItem("Load Scene"))
+                {
+                    auto *editorApp = EditorApp::Get();
+                    if (editorApp && editorApp->GetViewport())
+                    {
+                        editorApp->GetViewport()->GetScene().LoadScene("scene.json");
+                    }
+                }
+
+                ImGui::Separator();
                 ImGui::MenuItem("Exit");
                 ImGui::EndMenu();
             }

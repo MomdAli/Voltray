@@ -1,5 +1,6 @@
 # Editor Components Assets Utils module CMakeLists.txt
 add_library(VoltrayEditorComponentsAssetsUtils STATIC
+    Private/AssetOperations.cpp
     Private/FileOperations.cpp
     Private/IconRenderer.cpp
 )

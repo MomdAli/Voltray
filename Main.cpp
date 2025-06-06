@@ -30,7 +30,8 @@ int main()
     try
     {
         if (!glfwInit())
-            return -1;        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            return -1;
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         GLFWmonitor *monitor = glfwGetPrimaryMonitor();
@@ -41,14 +42,16 @@ int main()
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE); // Start maximized instead of fake fullscreen
 
-        GLFWwindow *window = glfwCreateWindow(1280, 720, "Voltray Editor", nullptr, nullptr);        if (!window)
+        GLFWwindow *window = glfwCreateWindow(1280, 720, "Voltray Editor", nullptr, nullptr);
+        if (!window)
         {
             glfwTerminate();
             return -1;
         }
 
         // Add F11 key callback to toggle fullscreen modes
-        glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods)                           {
+        glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods)
+                           {
             (void)scancode; // Suppress unused parameter warning
             (void)mods;     // Suppress unused parameter warning
             if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
@@ -73,7 +76,20 @@ int main()
             glfwDestroyWindow(window);
             glfwTerminate();
             return -1;
-        } // Initialize UserDataManager before ResourceManager
+        }
+
+        // Initialize ResourceManager first (required by UserDataManager)
+#ifdef _WIN32
+        char exePath[MAX_PATH];
+        GetModuleFileNameA(nullptr, exePath, MAX_PATH);
+        ResourceManager::Initialize(exePath);
+#else
+        char exePath[PATH_MAX];
+        readlink("/proc/self/exe", exePath, PATH_MAX);
+        ResourceManager::Initialize(exePath);
+#endif
+
+        // Initialize UserDataManager after ResourceManager
         if (!UserDataManager::Initialize())
         {
             std::cerr << "Failed to initialize UserDataManager" << std::endl;
@@ -89,16 +105,7 @@ int main()
             glfwDestroyWindow(window);
             glfwTerminate();
             return -1;
-        } // Initialize ResourceManager
-#ifdef _WIN32
-        char exePath[MAX_PATH];
-        GetModuleFileNameA(nullptr, exePath, MAX_PATH);
-        ResourceManager::Initialize(exePath);
-#else
-        char exePath[PATH_MAX];
-        readlink("/proc/self/exe", exePath, PATH_MAX);
-        ResourceManager::Initialize(exePath);
-#endif
+        }
 
         // Initialize and run editor
         EditorApp editor;

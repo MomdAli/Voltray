@@ -3,12 +3,14 @@
 #include "Console.h"
 #include "Scene.h"
 #include "SceneObject.h"
+#include "SceneObjectFactory.h"
 #include "BaseCamera.h"
 #include "Ray.h"
 #include "Vec3.h"
 #include <algorithm>
 
 using namespace Voltray::Editor::Components;
+using Voltray::Engine::SceneObjectFactory;
 
 namespace Voltray::Editor::Components::Assets
 {
@@ -20,7 +22,20 @@ namespace Voltray::Editor::Components::Assets
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
-            s_currentPayload = DragDropPayload(assetPath, assetType, isGlobal);
+            // Normalize the asset type based on file extension
+            std::string ext = assetPath.extension().string();
+            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+            std::string normalizedType;
+            if (ext == ".obj" || ext == ".fbx" || ext == ".gltf" || ext == ".glb" || ext == ".dae" || ext == ".3ds")
+                normalizedType = "model";
+            else if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tga" || ext == ".dds")
+                normalizedType = "texture";
+            else if (ext == ".lua" || ext == ".js" || ext == ".py" || ext == ".cs")
+                normalizedType = "script";
+            else
+                normalizedType = assetType; // fallback to original
+
+            s_currentPayload = DragDropPayload(assetPath, normalizedType, isGlobal);
             s_isDragging = true;
 
             // Set payload data
@@ -206,7 +221,6 @@ namespace Voltray::Editor::Components::Assets
 
         return true;
     }
-
     bool AssetDragDrop::LoadModelAsset(const std::filesystem::path &assetPath, const ImVec2 &position)
     {
         // Check file extension to determine model type
@@ -218,14 +232,58 @@ namespace Voltray::Editor::Components::Assets
         {
             Console::Print("Loading 3D model: " + assetPath.string());
 
-            // TODO: Implement actual model loading
-            // This would involve:
-            // 1. Loading the model using Assimp or similar
-            // 2. Creating mesh and material data
-            // 3. Creating a scene object
-            // 4. Positioning it in the world
+            auto *editorApp = EditorApp::Get();
+            if (!editorApp || !editorApp->GetViewport())
+            {
+                Console::PrintError("Cannot load model: Editor or viewport not available");
+                return false;
+            }
 
-            return CreateSceneObjectFromAsset(DragDropPayload(assetPath, "model", false), position);
+            auto &viewportScene = editorApp->GetViewport()->GetScene();
+            auto &scene = viewportScene.GetScene();
+            auto &camera = viewportScene.GetCamera();
+
+            try
+            {
+                // Use SceneObjectFactory to load the model from file
+                std::string fileName = assetPath.stem().string();
+                auto sceneObject = SceneObjectFactory::LoadFromFile(assetPath.string(), fileName);
+
+                if (sceneObject)
+                {
+                    // Convert screen position to world position using camera ray casting
+                    Ray ray = camera.ScreenToWorldRay(position.x, position.y);
+
+                    // Place object at a default distance along the ray
+                    float defaultDistance = 5.0f;
+                    Vec3 worldPosition = ray.origin + ray.direction * defaultDistance;
+
+                    // Set the object's position
+                    sceneObject->GetTransform().SetPosition(worldPosition);
+
+                    // Add to scene
+                    scene.AddObject(sceneObject);
+
+                    // Select the newly loaded object
+                    scene.SelectObject(sceneObject);
+
+                    Console::Print("Successfully loaded model '" + fileName + "' at position (" +
+                                   std::to_string(worldPosition.x) + ", " +
+                                   std::to_string(worldPosition.y) + ", " +
+                                   std::to_string(worldPosition.z) + ")");
+                    return true;
+                }
+                else
+                {
+                    Console::PrintError("Failed to create scene object from model file: " + assetPath.string());
+                    return false;
+                }
+            }
+            catch (const std::exception &e)
+            {
+                Console::PrintError("Exception loading model '" + assetPath.string() + "': " + std::string(e.what()));
+                return false;
+            }
         }
 
         Console::PrintWarning("Unsupported model format: " + extension);

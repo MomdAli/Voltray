@@ -75,22 +75,27 @@ namespace Voltray::Editor::Components::Assets
     }
     ContextMenuResult ContextMenu::ShowAssetMenu(const AssetItem &item, bool isGlobal)
     {
-        (void)isGlobal; // Suppress unused parameter warning
         ContextMenuResult result;
-
         if (ImGui::BeginPopupContextItem())
         {
             ImGui::Text("%s", item.name.c_str());
+            if (isGlobal)
+            {
+                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.3f, 1.0f), "(Global Asset)");
+            }
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Rename"))
+            // Disable Rename and Delete for global assets
+            bool canModify = !isGlobal;
+
+            if (ImGui::MenuItem("Rename", nullptr, false, canModify))
             {
                 s_showRenameDialog = true;
                 s_tempNewName = item.name;
                 result.targetItem = item;
             }
 
-            if (ImGui::MenuItem("Delete"))
+            if (ImGui::MenuItem("Delete", nullptr, false, canModify))
             {
                 s_showDeleteDialog = true;
                 s_tempDeleteItemName = item.name;

@@ -1,8 +1,8 @@
 # Editor Components Assets UI module CMakeLists.txt
 add_library(VoltrayEditorComponentsAssetsUI STATIC
-    Private/AssetBrowser.cpp
-    Private/ContextMenu.cpp
-    Private/NavigationBar.cpp
+    Private/AssetRenderer.cpp
+    Private/AssetBrowserWidget.cpp
+    Private/AssetsPanelRefactored.cpp
 )
 
 # Set include directories for this library

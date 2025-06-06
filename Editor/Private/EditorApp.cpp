@@ -15,7 +15,7 @@
 #include "Toolbar.h"
 #include "Viewport.h"
 #include "Inspector.h"
-#include "AssetsPanel.h"
+#include "AssetsPanelRefactored.h"
 #include "Console.h"
 #include "Settings.h"
 #include "Dockspace.h"
@@ -26,7 +26,29 @@ using Voltray::Engine::Input;
 namespace Voltray::Editor
 {
     // Singleton instance
-    EditorApp *EditorApp::s_Instance = nullptr;
+    EditorApp *EditorApp::s_Instance = nullptr; // Helper function to get layout file path
+    std::filesystem::path GetLayoutFilePath()
+    {
+        const auto *currentWorkspace = Voltray::Utils::WorkspaceManager::GetCurrentWorkspace();
+        if (currentWorkspace)
+        {
+            return currentWorkspace->path / "layout.ini";
+        }
+        // Fallback to current working directory if no workspace is active
+        return std::filesystem::current_path() / "layout.ini";
+    }
+
+    // Helper function to get ImGui ini file path
+    std::filesystem::path GetImGuiIniFilePath()
+    {
+        const auto *currentWorkspace = Voltray::Utils::WorkspaceManager::GetCurrentWorkspace();
+        if (currentWorkspace)
+        {
+            return currentWorkspace->path / "imgui.ini";
+        }
+        // Fallback to current working directory if no workspace is active
+        return std::filesystem::current_path() / "imgui.ini";
+    }
     void EditorApp::Init(GLFWwindow *window)
     {
         // Set singleton
@@ -34,14 +56,18 @@ namespace Voltray::Editor
 
         // Initialize Input system with window
         Input::Init(window);
-
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
         (void)io;
+
+        // Set ImGui ini file path to workspace directory
+        static std::string imguiIniPath = GetImGuiIniFilePath().string();
+        io.IniFilename = imguiIniPath.c_str();
+
         // Enable keyboard navigation and docking
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable; // Setup Dear ImGui style        // Load font using ResourceManager
-        std::string fontPath = Voltray::Utils::ResourceManager::GetResourcePath("Editor/Resources/Fonts/Sora.ttf");
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable; // Setup Dear ImGui style        // Load font using ResourceManager - check global assets first
+        std::string fontPath = Voltray::Utils::ResourceManager::GetGlobalResourcePath("Fonts/Lato.ttf");
         if (!fontPath.empty())
         {
             io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 20.0f);
@@ -49,7 +75,7 @@ namespace Voltray::Editor
         }
         else
         {
-            Components::Console::PrintError("Failed to load font: Editor/Resources/Fonts/Sora.ttf");
+            Components::Console::PrintError("Failed to load font: Fonts/Lato.ttf from global assets");
             // Fallback to ImGui default font
         }
         ImGui::StyleColorsDark();
@@ -61,17 +87,15 @@ namespace Voltray::Editor
         m_Toolbar = std::make_unique<Components::Toolbar>();
         m_Viewport = std::make_unique<Components::Viewport>();
         m_Inspector = std::make_unique<Components::Inspector>();
-        m_Assets = std::make_unique<AssetsPanel>();
+        m_Assets = std::make_unique<AssetsPanelRefactored>();
         m_Settings = std::make_unique<Components::Settings>(); // Register panels with default dock regions
         Components::Dockspace::RegisterPanel("Toolbar", m_Toolbar.get(), Components::Dockspace::Region::Top);
         Components::Dockspace::RegisterPanel("Inspector", m_Inspector.get(), Components::Dockspace::Region::Right);
         Components::Dockspace::RegisterPanel("Assets", m_Assets.get(), Components::Dockspace::Region::Bottom);
         Components::Dockspace::RegisterPanel("Console", &Components::Console::GetInstance(), Components::Dockspace::Region::Bottom);
         Components::Dockspace::RegisterPanel("Settings", m_Settings.get(), Components::Dockspace::Region::Right);
-        Components::Dockspace::RegisterPanel("Viewport", m_Viewport.get(), Components::Dockspace::Region::Center);
-
-        // Load saved layout or use default if none exists
-        const auto layoutFile = std::filesystem::current_path() / "layout.ini";
+        Components::Dockspace::RegisterPanel("Viewport", m_Viewport.get(), Components::Dockspace::Region::Center); // Load saved layout or use default if none exists
+        const auto layoutFile = GetLayoutFilePath();
 
         // Force reset the layout to fix any issues with docking
         Components::Dockspace::Reset(); // Uncomment this if you want to use saved layouts in the future
@@ -140,11 +164,10 @@ namespace Voltray::Editor
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glEnable(GL_DEPTH_TEST);
     }
-
     void EditorApp::Shutdown()
     { // Automatically save layout on exit
-        const char *layoutPath = (std::filesystem::current_path() / "layout.ini").string().c_str();
-        Components::Dockspace::SaveLayout(layoutPath); // First destroy all components before ImGui cleanup
+        const auto layoutPath = GetLayoutFilePath();
+        Components::Dockspace::SaveLayout(layoutPath.string().c_str()); // First destroy all components before ImGui cleanup
         // This ensures no component tries to use ImGui after it's destroyed
         m_Viewport.reset();
         m_Inspector.reset();

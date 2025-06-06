@@ -6,14 +6,14 @@
 #include "Toolbar.h"
 #include "Viewport.h"
 #include "Inspector.h"
-#include "AssetsPanel.h"
+#include "AssetsPanelRefactored.h"
 #include "Console.h"
 #include "Settings.h"
 #include "Dockspace.h"
 #include "WorkspaceDialog.h"
 #include "Workspace.h"
 
-using Voltray::Editor::Components::Assets::AssetsPanel;
+using Voltray::Editor::Components::Assets::AssetsPanelRefactored;
 
 /**
  * @file EditorApp.h
@@ -96,7 +96,7 @@ namespace Voltray::Editor
         std::unique_ptr<Components::Toolbar> m_Toolbar;
         std::unique_ptr<Components::Viewport> m_Viewport;
         std::unique_ptr<Components::Inspector> m_Inspector;
-        std::unique_ptr<AssetsPanel> m_Assets;
+        std::unique_ptr<AssetsPanelRefactored> m_Assets;
         std::unique_ptr<Components::Settings> m_Settings;
 
         // Panel visibility flags

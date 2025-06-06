@@ -21,7 +21,6 @@ namespace Voltray::Editor::Components::Assets
         std::uintmax_t size;
         std::filesystem::file_time_type lastModified;
         bool isDirectory;
-        bool isReadOnly;
         bool isHidden;
         std::string mimeType;
         std::string fileCategory;

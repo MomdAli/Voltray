@@ -1,4 +1,5 @@
 #include "CrashLogger.h"
+#include "UserDataManager.h"
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -56,30 +57,27 @@ namespace Voltray::Utils
         if (!s_LogFile.empty())
             return; // Log file already created
 
-        const std::string logDir = GetLogDirectory();
-
-        // Create logs directory if it doesn't exist
+        const std::string logDir = GetLogDirectory(); // Create logs directory if it doesn't exist
         std::filesystem::create_directories(logDir);
 
         // Create timestamped log file
         const std::string timestamp = GetTimestamp();
-        s_LogFile = logDir + "/crash_log_" + timestamp + ".txt";
-
-        // Write header
+        s_LogFile = (std::filesystem::path(logDir) / ("crash_log_" + timestamp + ".txt")).string(); // Write header
         std::ofstream log(s_LogFile);
         if (log.is_open())
         {
             log << "Voltray Crash Log - " << timestamp << std::endl;
             log << "=======================================" << std::endl;
             log << "Working directory: " << std::filesystem::current_path().string() << std::endl;
+            log << "Log directory: " << logDir << std::endl;
             log << std::endl;
             log.close();
         }
     }
-
     std::string CrashLogger::GetLogDirectory()
     {
-        return (std::filesystem::current_path() / "logs").string();
+        // Use UserDataManager to get the global AppData directory for logs
+        return (UserDataManager::GetAppDataDirectory() / "logs").string();
     }
 
     std::string CrashLogger::GetTimestamp()

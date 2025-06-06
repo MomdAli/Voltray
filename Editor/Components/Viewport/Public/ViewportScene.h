@@ -75,13 +75,25 @@ namespace Voltray::Editor::Components
          * @param fov Field of view for perspective cameras
          * @param orthoSize Orthographic size for parallel cameras
          */
-        void UpdateCameraSettings(float fov, float orthoSize, float nearPlane, float farPlane);
+        void UpdateCameraSettings(float fov, float orthoSize, float nearPlane, float farPlane); /**
+                                                                                                 * @brief Get current camera type
+                                                                                                 * @return Current camera type
+                                                                                                 */
+        CameraType GetCurrentCameraType() const;
 
         /**
-         * @brief Get current camera type
-         * @return Current camera type
+         * @brief Save the current scene to a file
+         * @param filepath Path to save the scene file
+         * @return True if successful, false otherwise
          */
-        CameraType GetCurrentCameraType() const;
+        bool SaveScene(const std::string &filepath) const;
+
+        /**
+         * @brief Load a scene from a file
+         * @param filepath Path to the scene file
+         * @return True if successful, false otherwise
+         */
+        bool LoadScene(const std::string &filepath);
 
     private:
         void createDemoScene();

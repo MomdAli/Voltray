@@ -141,6 +141,14 @@ add_executable(Voltray
     ${CMAKE_SOURCE_DIR}/Vendor/glad/src/gl.c
 )
 
+# Copy Resources to build output directory for runtime access
+add_custom_command(TARGET Voltray POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/$<CONFIG>/Resources
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Resources ${CMAKE_BINARY_DIR}/$<CONFIG>/Resources
+    COMMENT "Copying Resources folder to build output directory"
+    VERBATIM
+)
+
 # Link all libraries to the main executable
 target_link_libraries(Voltray PRIVATE
     VoltrayMath

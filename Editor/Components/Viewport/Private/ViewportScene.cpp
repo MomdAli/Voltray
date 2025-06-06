@@ -60,76 +60,38 @@ namespace Voltray::Editor::Components
             m_Camera->SetViewportBounds(x, y, width, height);
         }
     }
-
     void ViewportScene::createDemoScene()
     {
         try
         {
             // Add a cube at the origin
             auto cube = SceneObjectFactory::CreateCube("DemoCube", 1.0f);
-            cube->GetTransform().SetPosition(::Vec3(0.0f, 0.0f, 0.0f));
+            cube->GetTransform().SetPosition(Vec3(0.0f, 0.0f, 0.0f));
             m_Scene->AddObject(cube);
 
             // Add a sphere to the right
             auto sphere = SceneObjectFactory::CreateSphere("DemoSphere", 0.8f);
-            sphere->GetTransform().SetPosition(::Vec3(3.0f, 0.0f, 0.0f));
+            sphere->GetTransform().SetPosition(Vec3(3.0f, 0.0f, 0.0f));
             m_Scene->AddObject(sphere);
 
             // Add a plane as ground
             auto ground = SceneObjectFactory::CreatePlane("Ground", 10.0f, 10.0f);
-            ground->GetTransform().SetPosition(::Vec3(0.0f, -2.0f, 0.0f));
+            ground->GetTransform().SetPosition(Vec3(0.0f, -2.0f, 0.0f));
             m_Scene->AddObject(ground);
 
             // Select the cube by default
             m_Scene->SelectObject(cube);
-            Console::Print("Demo scene created with cube selected by default");
+            Console::Print("Demo scene created with cube, sphere, and ground plane");
         }
         catch (const std::exception &e)
         {
-            Console::PrintError("Failed to create scene objects: " + std::string(e.what()));
+            Console::PrintError("Failed to create demo scene objects: " + std::string(e.what()));
         }
     }
-
     void ViewportScene::loadDemoModel()
     {
-        // Try to load pyramid model using ResourceManager
-        std::string modelPath = ResourceManager::GetResourcePath("Models/pyramid.obj");
-
-        if (!modelPath.empty())
-        {
-            try
-            {
-                auto pyramid = SceneObjectFactory::LoadFromFile(modelPath, "TestPyramid");
-                if (pyramid)
-                {
-                    pyramid->GetTransform().SetPosition(::Vec3(-3.0f, 1.0f, 0.0f));
-                    m_Scene->AddObject(pyramid);
-                }
-            }
-            catch (const std::exception &e)
-            {
-                Console::PrintWarning("Exception loading pyramid: " + std::string(e.what()));
-            }
-        }
-
-        // Blender monkey model
-        modelPath = ResourceManager::GetResourcePath("Models/Suzanne.obj");
-        if (!modelPath.empty())
-        {
-            try
-            {
-                auto monkey = SceneObjectFactory::LoadFromFile(modelPath, "Suzanne");
-                if (monkey)
-                {
-                    monkey->GetTransform().SetPosition(::Vec3(3.0f, 2.0f, 0.0f));
-                    m_Scene->AddObject(monkey);
-                }
-            }
-            catch (const std::exception &e)
-            {
-                Console::PrintWarning("Exception loading monkey: " + std::string(e.what()));
-            }
-        }
+        // Demo model loading removed - models will be loaded via drag and drop from workspace
+        Console::Print("Demo model loading disabled - use Assets panel to drag models into the scene");
     }
 
     void ViewportScene::SwitchCamera(CameraType type)
@@ -179,7 +141,6 @@ namespace Voltray::Editor::Components
             orthographicCamera->SetClippingPlanes(nearPlane, farPlane);
         }
     }
-
     CameraType ViewportScene::GetCurrentCameraType() const
     {
         if (m_Camera)
@@ -187,5 +148,27 @@ namespace Voltray::Editor::Components
             return m_Camera->GetType();
         }
         return CameraType::PERSPECTIVE; // Default fallback
+    }
+
+    bool ViewportScene::SaveScene(const std::string &filepath) const
+    {
+        if (!m_Scene)
+        {
+            Console::PrintError("Cannot save scene: Scene not initialized");
+            return false;
+        }
+
+        return m_Scene->SaveToFile(filepath);
+    }
+
+    bool ViewportScene::LoadScene(const std::string &filepath)
+    {
+        if (!m_Scene)
+        {
+            Console::PrintError("Cannot load scene: Scene not initialized");
+            return false;
+        }
+
+        return m_Scene->LoadFromFile(filepath);
     }
 }

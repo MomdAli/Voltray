@@ -44,14 +44,9 @@ namespace Voltray::Editor::Components::Assets
             {
                 info.size = GetDirectorySize(path);
             }
-
             info.lastModified = std::filesystem::last_write_time(path, ec);
             if (ec)
                 info.lastModified = std::filesystem::file_time_type{};
-
-            // Get permissions
-            auto perms = std::filesystem::status(path, ec).permissions();
-            info.isReadOnly = !ec && (perms & std::filesystem::perms::owner_write) == std::filesystem::perms::none;
 
 #ifdef _WIN32
             // Check for hidden attribute on Windows
@@ -68,7 +63,6 @@ namespace Voltray::Editor::Components::Assets
             info.isDirectory = false;
             info.size = 0;
             info.lastModified = std::filesystem::file_time_type{};
-            info.isReadOnly = false;
             info.isHidden = false;
         }
 

@@ -21,14 +21,28 @@ namespace Voltray::Utils
          * @brief Initialize the resource manager with the executable path
          * @param executablePath Path to the current executable
          */
-        static void Initialize(const std::string &executablePath);
+        static void Initialize(const std::string &executablePath); /**
+                                                                    * @brief Get the full path to a resource file in workspace or global assets
+                                                                    * @param relativePath Relative path to the resource e.g. "Models/cube.obj"
+                                                                    * @param workspacePath Optional path to current workspace, if empty uses global assets
+                                                                    * @return Full path to the resource, or empty string if not found
+                                                                    */
+        static std::string GetResourcePath(const std::string &relativePath, const std::string &workspacePath = "");
 
         /**
-         * @brief Get the full path to a resource file
-         * @param relativePath Relative path from the project root (e.g., "Editor/Resources/Fonts/Sora.ttf")
+         * @brief Get the full path to a resource file in global assets only
+         * @param relativePath Relative path to the resource
          * @return Full path to the resource, or empty string if not found
          */
-        static std::string GetResourcePath(const std::string &relativePath);
+        static std::string GetGlobalResourcePath(const std::string &relativePath);
+
+        /**
+         * @brief Get the full path to a resource file in workspace only
+         * @param relativePath Relative path to the resource
+         * @param workspacePath Path to the workspace
+         * @return Full path to the resource, or empty string if not found
+         */
+        static std::string GetWorkspaceResourcePath(const std::string &relativePath, const std::string &workspacePath);
 
         /**
          * @brief Get the application directory (where the executable is located)
@@ -37,11 +51,12 @@ namespace Voltray::Utils
         static std::string GetApplicationDirectory();
 
         /**
-         * @brief Check if a resource file exists
+         * @brief Check if a resource file exists in workspace or global assets
          * @param relativePath Relative path to the resource
+         * @param workspacePath Optional path to current workspace, if empty uses global assets
          * @return True if the resource exists, false otherwise
          */
-        static bool ResourceExists(const std::string &relativePath);
+        static bool ResourceExists(const std::string &relativePath, const std::string &workspacePath = "");
 
     private:
         static std::string s_executablePath;

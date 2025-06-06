@@ -103,6 +103,17 @@ namespace Voltray::Editor::Components::Assets
         static bool LoadModelAsset(const std::filesystem::path &assetPath, const ImVec2 &position);
 
         /**
+         * @brief Update live preview during drag operation
+         * @param mousePosition Current mouse position in screen coordinates
+         */
+        void UpdateLivePreview(const ImVec2 &mousePosition);
+
+        /**
+         * @brief Cleanup any preview objects created during drag
+         */
+        void CleanupPreview();
+
+        /**
          * @brief Apply texture asset to selected object
          * @param assetPath Path to the texture file
          * @return True if texture was applied successfully

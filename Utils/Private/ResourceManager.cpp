@@ -1,4 +1,5 @@
 #include "ResourceManager.h"
+#include "UserDataManager.h"
 #include <iostream>
 #include <vector>
 
@@ -22,41 +23,61 @@ namespace Voltray::Utils
         s_projectRoot = FindProjectRoot(s_applicationDirectory);
     }
 
-    std::string ResourceManager::GetResourcePath(const std::string &relativePath)
+    std::string ResourceManager::GetResourcePath(const std::string &relativePath, const std::string &workspacePath)
     {
-        if (s_projectRoot.empty())
+        if (workspacePath.empty())
         {
-            return "";
+            return GetGlobalResourcePath(relativePath);
+        }
+        else
+        {
+            // Try workspace first, then fallback to global
+            std::string workspaceResource = GetWorkspaceResourcePath(relativePath, workspacePath);
+            if (!workspaceResource.empty())
+            {
+                return workspaceResource;
+            }
+            return GetGlobalResourcePath(relativePath);
+        }
+    }
+
+    std::string ResourceManager::GetGlobalResourcePath(const std::string &relativePath)
+    {
+        try
+        {
+            auto globalAssetsPath = UserDataManager::GetGlobalAssetsDirectory();
+            std::filesystem::path fullPath = globalAssetsPath / relativePath;
+
+            if (std::filesystem::exists(fullPath))
+            {
+                return fullPath.string();
+            }
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error accessing global resource: " << e.what() << std::endl;
         }
 
-        // Try project root first
-        std::filesystem::path fullPath = std::filesystem::path(s_projectRoot) / relativePath;
-        if (std::filesystem::exists(fullPath))
+        return "";
+    }
+
+    std::string ResourceManager::GetWorkspaceResourcePath(const std::string &relativePath, const std::string &workspacePath)
+    {
+        try
         {
-            return fullPath.string();
+            std::filesystem::path fullPath = std::filesystem::path(workspacePath) / relativePath;
+
+            if (std::filesystem::exists(fullPath))
+            {
+                return fullPath.string();
+            }
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error accessing workspace resource: " << e.what() << std::endl;
         }
 
-        // Try relative to executable directory
-        fullPath = std::filesystem::path(s_applicationDirectory) / relativePath;
-        if (std::filesystem::exists(fullPath))
-        {
-            return fullPath.string();
-        } // Try going up one level from executable (for build subdirectories)
-        fullPath = std::filesystem::path(s_applicationDirectory).parent_path() / relativePath;
-        if (std::filesystem::exists(fullPath))
-        {
-            return fullPath.string();
-        }
-
-        // Additional check: try two levels up from executable
-        fullPath = std::filesystem::path(s_applicationDirectory).parent_path().parent_path() / relativePath;
-        if (std::filesystem::exists(fullPath))
-        {
-            return fullPath.string();
-        }
-
-        // Resource not found
-        return ""; // Resource not found
+        return "";
     }
 
     std::string ResourceManager::GetApplicationDirectory()
@@ -64,9 +85,9 @@ namespace Voltray::Utils
         return s_applicationDirectory;
     }
 
-    bool ResourceManager::ResourceExists(const std::string &relativePath)
+    bool ResourceManager::ResourceExists(const std::string &relativePath, const std::string &workspacePath)
     {
-        return !GetResourcePath(relativePath).empty();
+        return !GetResourcePath(relativePath, workspacePath).empty();
     }
 
     std::string ResourceManager::FindProjectRoot(const std::string &startPath)

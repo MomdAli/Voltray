@@ -59,6 +59,16 @@ namespace Voltray::Engine
             UpdatePivotFromMesh();
         }
         std::shared_ptr<Mesh> GetMesh() const { return m_Mesh; }
+        std::pair<Vec3, Vec3> GetBounds() const
+        {
+            if (m_Mesh)
+            {
+                Vec3 minBounds, maxBounds;
+                m_Mesh->GetBounds(minBounds, maxBounds);
+                return {minBounds, maxBounds};
+            }
+            return {Vec3(0.0f), Vec3(0.0f)};
+        }
 
         // Properties
         const std::string &GetName() const { return m_Name; }
@@ -66,11 +76,13 @@ namespace Voltray::Engine
         bool IsVisible() const { return m_Visible; }
         void SetVisible(bool visible) { m_Visible = visible; }
         bool IsSelected() const { return m_Selected; }
-        void SetSelected(bool selected) { m_Selected = selected; }
-
-        // Material properties
+        void SetSelected(bool selected) { m_Selected = selected; } // Material properties
         const Vec3 &GetMaterialColor() const { return m_MaterialColor; }
         void SetMaterialColor(const Vec3 &color) { m_MaterialColor = color; }
+
+        // Mesh file path (for persistence)
+        const std::string &GetMeshFilePath() const { return m_MeshFilePath; }
+        void SetMeshFilePath(const std::string &filePath) { m_MeshFilePath = filePath; }
 
         /**
          * @brief Gets the model matrix for rendering.
@@ -107,10 +119,12 @@ namespace Voltray::Engine
         Transform m_Transform;
         std::shared_ptr<Mesh> m_Mesh;
         bool m_Visible = true;
-        bool m_Selected = false;
-        // Default material color is white
+        bool m_Selected = false;                // Default material color is white
         Vec3 m_MaterialColor{1.0f, 1.0f, 1.0f}; // Store relative pivot offset from mesh center (0,0,0 = center)
         Vec3 m_RelativePivot{0.0f, 0.0f, 0.0f};
+
+        // Store the file path of the loaded mesh (empty for procedural meshes)
+        std::string m_MeshFilePath;
     };
 
 }

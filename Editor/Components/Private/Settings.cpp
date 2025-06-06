@@ -108,10 +108,9 @@ namespace Voltray::Editor::Components
                 ImGui::ShowMetricsWindow(&showImGuiMetrics);
             }
             ImGui::Separator();
-
             ImGui::TextWrapped("Resource Manager");
             ImGui::TextWrapped("Font Path: %s",
-                               ResourceManager::GetResourcePath("Editor/Resources/Fonts/Sora.ttf").c_str());
+                               ResourceManager::GetGlobalResourcePath("Fonts/Lato.ttf").c_str());
             ImGui::TextWrapped("App Directory: %s",
                                ResourceManager::GetApplicationDirectory().c_str());
             ImGui::Unindent();

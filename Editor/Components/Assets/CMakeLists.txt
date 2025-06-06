@@ -8,8 +8,7 @@ add_subdirectory(Utils)
 
 # Create the main Assets library
 add_library(VoltrayEditorComponentsAssets STATIC
-    Private/Assets.cpp
-    Private/AssetsPanel.cpp
+    # No source files needed - all functionality is in subdirectories
 )
 
 # Set include directories for this library

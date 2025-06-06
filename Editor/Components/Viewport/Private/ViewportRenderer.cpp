@@ -19,12 +19,12 @@ namespace Voltray::Editor::Components
 
     void ViewportRenderer::Initialize()
     { // Load shaders using ResourceManager
-        std::string defaultVertPath = ResourceManager::GetResourcePath("Shaders/default.vert");
-        std::string defaultFragPath = ResourceManager::GetResourcePath("Shaders/default.frag");
-        std::string skyboxVertPath = ResourceManager::GetResourcePath("Shaders/skybox.vert");
-        std::string skyboxFragPath = ResourceManager::GetResourcePath("Shaders/skybox.frag");
-        std::string outlineVertPath = ResourceManager::GetResourcePath("Shaders/outline.vert");
-        std::string outlineFragPath = ResourceManager::GetResourcePath("Shaders/outline.frag");
+        std::string defaultVertPath = ResourceManager::GetGlobalResourcePath("Shaders/default.vert");
+        std::string defaultFragPath = ResourceManager::GetGlobalResourcePath("Shaders/default.frag");
+        std::string skyboxVertPath = ResourceManager::GetGlobalResourcePath("Shaders/skybox.vert");
+        std::string skyboxFragPath = ResourceManager::GetGlobalResourcePath("Shaders/skybox.frag");
+        std::string outlineVertPath = ResourceManager::GetGlobalResourcePath("Shaders/outline.vert");
+        std::string outlineFragPath = ResourceManager::GetGlobalResourcePath("Shaders/outline.frag");
 
         // Load default shader
         if (!defaultVertPath.empty() && !defaultFragPath.empty())
@@ -67,6 +67,23 @@ namespace Voltray::Editor::Components
                 m_OutlineShader = nullptr;
             }
         }
+
+        // Setup full-screen triangle for skybox rendering
+        {
+            // Triangle that covers the screen
+            float skyboxVertices[] = {
+                -1.0f, -1.0f,
+                3.0f, -1.0f,
+                -1.0f, 3.0f};
+            glGenVertexArrays(1, &m_SkyboxVAO);
+            glGenBuffers(1, &m_SkyboxVBO);
+            glBindVertexArray(m_SkyboxVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, m_SkyboxVBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+            glBindVertexArray(0);
+        }
     }
 
     void ViewportRenderer::RenderScene(::Scene &scene, ::BaseCamera &camera, ::Renderer &renderer, int width, int height)
@@ -74,13 +91,18 @@ namespace Voltray::Editor::Components
         if (width <= 0 || height <= 0)
             return;
 
+        // Set viewport and clear color buffer to ensure skybox is visible even with no objects
+        glViewport(0, 0, width, height);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Set your preferred background color
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // Update camera
         camera.Update();
 
         // Render skybox first
         renderSkybox(camera);
 
-        // Clear depth buffer after skybox to ensure proper depth testing
+        // Clear depth buffer after skybox to ensure proper depth testing for scene objects
         glClear(GL_DEPTH_BUFFER_BIT);
 
         // Update scene
@@ -101,16 +123,29 @@ namespace Voltray::Editor::Components
     void ViewportRenderer::renderSkybox(::BaseCamera &camera)
     {
         if (!m_SkyboxShader)
+        {
+            Console::PrintError("Skybox shader not initialized");
             return;
+        }
 
+        // Draw with depth <= far plane, disable depth write
+        glDepthFunc(GL_LEQUAL);
         glDepthMask(GL_FALSE);
+
         m_SkyboxShader->Bind();
 
+        // Set the inverse view-projection matrix uniform
         auto invVP = camera.GetViewProjectionMatrix().Inverse();
         m_SkyboxShader->SetUniformMat4("u_InverseViewProj", invVP.data);
 
+        // Bind full-screen triangle VAO and draw
+        glBindVertexArray(m_SkyboxVAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+
+        // Restore depth state
         glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
     }
 
     void ViewportRenderer::renderSceneObjects(::Scene &scene, ::BaseCamera &camera, ::Renderer &renderer)

@@ -32,12 +32,9 @@ namespace Voltray::Editor::Components::Assets
         bool isGlobal = false; // True if it's a global asset, false if workspace-specific
         size_t fileSize = 0;
         std::string extension;
-        bool isParentDir = false; // For ".." navigation
-
-        // Additional metadata
+        bool isParentDir = false; // For ".." navigation        // Additional metadata
         std::string mimeType;
         bool isHidden = false;
-        bool isReadOnly = false;
         std::filesystem::file_time_type lastModified;
     };
 

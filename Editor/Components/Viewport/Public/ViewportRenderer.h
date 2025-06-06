@@ -51,5 +51,9 @@ namespace Voltray::Editor::Components
         std::unique_ptr<::Shader> m_Shader;
         std::unique_ptr<::Shader> m_SkyboxShader;
         std::unique_ptr<::Shader> m_OutlineShader;
+
+        // Full-screen triangle for skybox
+        GLuint m_SkyboxVAO;
+        GLuint m_SkyboxVBO;
     };
 }

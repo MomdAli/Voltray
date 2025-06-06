@@ -81,6 +81,10 @@ namespace Voltray::Engine
         float GetNearPlane() const { return m_Near; }
         float GetFarPlane() const { return m_Far; }
         const std::string &GetName() const { return m_Name; }
+        float GetDistanceToTarget() const
+        {
+            return (m_Position - m_Target).Length();
+        }
 
         // Input handling (can be overridden by derived classes)
         virtual void Update();

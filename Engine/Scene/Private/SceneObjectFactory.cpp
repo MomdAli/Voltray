@@ -39,7 +39,6 @@ namespace Voltray::Engine
         auto mesh = PrimitiveGenerator::CreateTriangle(size);
         return std::make_shared<SceneObject>(mesh, name);
     }
-
     std::shared_ptr<SceneObject> SceneObjectFactory::LoadFromFile(const std::string &filepath, const std::string &name)
     {
         if (!std::filesystem::exists(filepath))
@@ -57,9 +56,15 @@ namespace Voltray::Engine
 
         std::string objectName = name.empty() ? std::filesystem::path(filepath).stem().string() : name;
 
-        return CreateFromMesh(mesh, objectName);
-    }
+        auto sceneObject = CreateFromMesh(mesh, objectName);
+        if (sceneObject)
+        {
+            // Set the mesh file path for persistence
+            sceneObject->SetMeshFilePath(filepath);
+        }
 
+        return sceneObject;
+    }
     std::vector<std::shared_ptr<SceneObject>> SceneObjectFactory::LoadAllFromFile(const std::string &filepath)
     {
         std::vector<std::shared_ptr<SceneObject>> objects;
@@ -83,6 +88,8 @@ namespace Voltray::Engine
             auto object = CreateFromMesh(meshes[i], objectName);
             if (object)
             {
+                // Set the mesh file path for persistence
+                object->SetMeshFilePath(filepath);
                 objects.push_back(object);
             }
         }

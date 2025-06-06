@@ -2,6 +2,7 @@
 #include "Console.h"
 #include "Settings.h"
 #include "EditorApp.h"
+#include "AssetDragDrop.h"
 #include <imgui.h>
 #include <stdexcept>
 
@@ -54,9 +55,7 @@ namespace Voltray::Editor::Components
 
         m_Renderer.RenderScene(m_Scene.GetScene(), m_Scene.GetCamera(), m_Scene.GetRenderer(), width, height);
 
-        m_Framebuffer.Unbind();
-
-        // Display the rendered image in ImGui
+        m_Framebuffer.Unbind(); // Display the rendered image in ImGui
         ImGui::Image((ImTextureID)(intptr_t)m_Framebuffer.GetColorTexture(),
                      size, ImVec2{0, 1}, ImVec2{1, 0});
 
@@ -64,6 +63,17 @@ namespace Voltray::Editor::Components
         ImVec2 imagePos = ImGui::GetItemRectMin();
         ImVec2 imageSize = ImGui::GetItemRectSize();
         m_Scene.SetCameraViewportBounds(imagePos.x, imagePos.y, imageSize.x, imageSize.y);
+
+        // Handle drag and drop operations
+        if (const auto *payload = Voltray::Editor::Components::Assets::AssetDragDrop::AcceptDrop())
+        {
+            // Get mouse position relative to the viewport image
+            ImVec2 mousePos = ImGui::GetMousePos();
+            ImVec2 dropPosition = ImVec2(mousePos.x - imagePos.x, mousePos.y - imagePos.y);
+
+            // Handle the drop
+            Voltray::Editor::Components::Assets::AssetDragDrop::HandleViewportDrop(*payload, dropPosition);
+        }
 
         // Handle input
         m_Input.ProcessInput(m_Scene.GetScene(), m_Scene.GetCamera(), imagePos, imageSize);

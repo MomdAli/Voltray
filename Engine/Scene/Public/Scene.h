@@ -103,13 +103,32 @@ namespace Voltray::Engine
 
         /**
          * @brief Clears all object selections.    */
-        void ClearSelection();
+        void ClearSelection(); /**
+                                * @brief Gets the currently selected object.
+                                * @return Shared pointer to selected object, or nullptr if none.
+                                */
+        std::shared_ptr<SceneObject> GetSelectedObject() const;
 
         /**
-         * @brief Gets the currently selected object.
-         * @return Shared pointer to selected object, or nullptr if none.
+         * @brief Save the scene to a file
+         * @param filepath Path to save the scene file
+         * @return True if successful, false otherwise
          */
-        std::shared_ptr<SceneObject> GetSelectedObject() const;
+        bool SaveToFile(const std::string &filepath) const;
+
+        /**
+         * @brief Load the scene from a file
+         * @param filepath Path to the scene file
+         * @return True if successful, false otherwise
+         */
+        bool LoadFromFile(const std::string &filepath);
+
+        /**
+         * @brief Casts a ray into the scene and returns the first object hit.
+         * @param ray The ray to cast.
+         * @return Shared pointer to the first object hit, or nullptr if no object was hit.
+         */
+        std::shared_ptr<SceneObject> RaycastToObject(const Ray &ray) const;
 
     private:
         std::vector<std::shared_ptr<SceneObject>> m_Objects;

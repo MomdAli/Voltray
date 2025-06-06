@@ -50,9 +50,21 @@ namespace Voltray::Utils
 
         /**
          * @brief Initialize default global assets (primitives like cube, sphere, etc.)
+         * @param forceUpdate Force update even if assets are already initialized
          * @return true if successful
          */
-        static bool InitializeDefaultGlobalAssets();
+        static bool InitializeDefaultGlobalAssets(bool forceUpdate = false);
+
+        /**
+         * @brief Copy Resources from build directory to user global assets
+         * @param resourcesPath Path to the Resources directory in build output
+         * @return true if successful
+         */
+        static bool CopyResourcesFromBuild(const std::filesystem::path &resourcesPath); /**
+                                                                                         * @brief Check if we're running in development environment (Resources folder exists)
+                                                                                         * @return true if development environment detected
+                                                                                         */
+        static bool IsDevEnvironment();
 
         /**
          * @brief Check if the user data system is initialized
@@ -63,6 +75,7 @@ namespace Voltray::Utils
     private:
         static std::filesystem::path GetPlatformAppDataPath();
         static bool CreateDirectoryStructure();
+        static bool CreateDirectoryStructureFromResources(const std::filesystem::path &globalAssetsPath);
 
         static std::filesystem::path s_AppDataPath;
         static bool s_Initialized;
