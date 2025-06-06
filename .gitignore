@@ -5,6 +5,9 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 
+# Generated documentation (handled by GitHub Actions)
+docs/
+
 # Logs and debug files
 logs/
 *.log
@@ -14,7 +17,6 @@ resource_debug_output.txt
 # Compiled binaries
 *.out
 *.o
-*.obj
 *.exe
 *.dll
 *.so
