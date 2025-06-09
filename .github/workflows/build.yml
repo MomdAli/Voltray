@@ -41,9 +41,9 @@ jobs:
     - name: Create package
       working-directory: ${{ env.BUILD_DIR }}
       run: |
-        mkdir -p Voltray-windows
+        if not exist Voltray-windows mkdir Voltray-windows
         copy ${{ env.BUILD_TYPE }}\Voltray.exe Voltray-windows\
-        xcopy /E /I ..\Shaders Voltray-windows\Shaders
+        xcopy /E /I ..\Resources\Shaders Voltray-windows\Shaders
         7z a Voltray-windows.zip Voltray-windows
 
     - name: Upload artifacts
@@ -84,7 +84,7 @@ jobs:
       run: |
         mkdir -p Voltray-macos
         cp Voltray Voltray-macos/
-        cp -R ../Shaders Voltray-macos/
+        cp -R ../Resources/Shaders Voltray-macos/
         zip -r Voltray-macos.zip Voltray-macos
 
     - name: Upload artifacts
@@ -124,7 +124,7 @@ jobs:
       run: |
         mkdir -p Voltray-linux
         cp Voltray Voltray-linux/
-        cp -R ../Shaders Voltray-linux/
+        cp -R ../Resources/Shaders Voltray-linux/
         tar -czvf Voltray-linux.tar.gz Voltray-linux
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
