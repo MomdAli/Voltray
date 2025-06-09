@@ -1,0 +1,47 @@
+{
+    "name": "Voltray Engine Development",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "voltray-dev",
+    "workspaceFolder": "/workspace",
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.cmake-tools",
+                "twxs.cmake",
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-themes",
+                "formulahendry.code-runner",
+                "vadimcn.vscode-lldb",
+                "xaver.clang-format",
+                "notskm.clang-tidy"
+            ],
+            "settings": {
+                "cmake.configureOnOpen": true,
+                "cmake.buildDirectory": "${workspaceFolder}/build",
+                "cmake.generator": "Ninja",
+                "cmake.configureArgs": [
+                    "-DCMAKE_BUILD_TYPE=Debug",
+                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+                ],
+                "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+                "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+            }
+        }
+    },
+    "postCreateCommand": "git config --global --add safe.directory /workspace && cmake --version && g++ --version",
+    "remoteUser": "vscode",
+    "forwardPorts": [
+        8080
+    ],
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
+    ],
+    "containerEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}"
+    }
+}

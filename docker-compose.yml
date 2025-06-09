@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Development environment with full toolchain
+  voltray-dev:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:cached
+      - voltray-build-cache:/workspace/build
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - CMAKE_BUILD_TYPE=Debug
+    working_dir: /workspace
+    command: sleep infinity
+    network_mode: host
+    stdin_open: true
+    tty: true
+
+  # Linux build environment
+  voltray-linux-build:
+    build:
+      context: .
+      target: builder
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:cached
+      - voltray-linux-build:/workspace/build-linux
+    environment:
+      - CMAKE_BUILD_TYPE=Release
+    working_dir: /workspace
+    command: >
+      bash -c "
+        cmake -B build-linux -G Ninja -DCMAKE_BUILD_TYPE=Release &&
+        cmake --build build-linux --parallel
+      "
+  # Runtime environment for testing
+  voltray-runtime:
+    build:
+      context: .
+      target: runtime
+      dockerfile: Dockerfile
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+    network_mode: host
+    depends_on:
+      - voltray-linux-build
+
+volumes:
+  voltray-build-cache:
+  voltray-linux-build:

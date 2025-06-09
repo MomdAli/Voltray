@@ -1,9 +1,19 @@
 # Build files
 build/
+build-*/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
+
+# Docker related files and artifacts
+artifacts/
+docker-artifacts/
+.docker/
+docker-build-cache/
+
+# Generated documentation (handled by GitHub Actions)
+docs/
 
 # Logs and debug files
 logs/
@@ -14,7 +24,6 @@ resource_debug_output.txt
 # Compiled binaries
 *.out
 *.o
-*.obj
 *.exe
 *.dll
 *.so
