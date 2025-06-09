@@ -1,8 +1,6 @@
 #include "IFormatLoader.h"
-#include "Console.h"
 #include <algorithm>
-
-using Voltray::Editor::Components::Console;
+#include <iostream>
 
 // Include Assimp
 #include <assimp/Importer.hpp>
@@ -112,9 +110,8 @@ namespace Voltray::Engine
         {
             throw std::runtime_error("Assimp error loading " + filepath + ": " + std::string(importer.GetErrorString()));
         }
-
-        Console::Print("Loading with Assimp: " + filepath);
-        Console::Print("Scene contains " + std::to_string(scene->mNumMeshes) + " meshes");
+        std::cout << "Loading with Assimp: " << filepath << std::endl;
+        std::cout << "Scene contains " << scene->mNumMeshes << " meshes" << std::endl;
 
         // Process all meshes in the scene
         for (unsigned int i = 0; i < scene->mNumMeshes; i++)
@@ -137,14 +134,14 @@ namespace Voltray::Engine
 
         if (!result.empty())
         {
-            Console::Print("Successfully loaded " + std::to_string(result.size()) + " meshes from: " + filepath);
+            std::cout << "Successfully loaded " << result.size() << " meshes from: " << filepath << std::endl;
             size_t totalVertices = 0, totalFaces = 0;
             for (const auto &mesh : result)
             {
                 totalVertices += mesh.vertices.size() / 8;
                 totalFaces += mesh.indices.size() / 3;
             }
-            Console::Print("Total vertices: " + std::to_string(totalVertices) + ", Total faces: " + std::to_string(totalFaces));
+            std::cout << "Total vertices: " << totalVertices << ", Total faces: " << totalFaces << std::endl;
         }
 
         return result;

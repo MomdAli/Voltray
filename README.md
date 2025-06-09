@@ -130,6 +130,18 @@ chmod +x build.sh
 ./build.sh
 ```
 
+**Docker (Cross-Platform):**
+```bash
+git clone https://github.com/MomdAli/Voltray.git
+cd Voltray
+# Windows
+docker-build.bat
+# Linux/macOS
+./docker-build.sh
+```
+
+> 📋 **Docker Development**: For comprehensive Docker setup including development environment, see [`docs/DOCKER.md`](docs/DOCKER.md)
+
 ### Manual Build
 
 For more control over the build process:

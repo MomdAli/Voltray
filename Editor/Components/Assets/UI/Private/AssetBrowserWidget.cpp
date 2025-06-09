@@ -290,9 +290,8 @@ namespace Voltray::Editor::Components::Assets
         ImGui::Text("Search:");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(150.0f);
-
         char searchBuffer[256];
-        strncpy_s(searchBuffer, m_SearchFilter.c_str(), sizeof(searchBuffer) - 1);
+        strncpy(searchBuffer, m_SearchFilter.c_str(), sizeof(searchBuffer) - 1);
         searchBuffer[sizeof(searchBuffer) - 1] = '\0';
 
         if (ImGui::InputText("##Search", searchBuffer, sizeof(searchBuffer)))

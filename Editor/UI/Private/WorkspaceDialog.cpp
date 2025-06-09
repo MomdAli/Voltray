@@ -176,7 +176,9 @@ namespace Voltray::Editor::UI
             if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &documentsPath)))
             {
                 std::filesystem::path defaultPath = std::filesystem::path(documentsPath) / "VoltrayProjects";
-                strncpy_s(s_NewWorkspacePath, sizeof(s_NewWorkspacePath), defaultPath.string().c_str(), _TRUNCATE);
+                std::string pathStr = defaultPath.string();
+                strncpy(s_NewWorkspacePath, pathStr.c_str(), sizeof(s_NewWorkspacePath) - 1);
+                s_NewWorkspacePath[sizeof(s_NewWorkspacePath) - 1] = '\0';
                 CoTaskMemFree(documentsPath);
             }
 #endif
@@ -291,7 +293,9 @@ namespace Voltray::Editor::UI
             if (SHGetPathFromIDListW(pidl, path))
             {
                 std::filesystem::path selectedPath(path);
-                strncpy_s(s_NewWorkspacePath, sizeof(s_NewWorkspacePath), selectedPath.string().c_str(), _TRUNCATE);
+                std::string pathStr = selectedPath.string();
+                strncpy(s_NewWorkspacePath, pathStr.c_str(), sizeof(s_NewWorkspacePath) - 1);
+                s_NewWorkspacePath[sizeof(s_NewWorkspacePath) - 1] = '\0';
             }
             CoTaskMemFree(pidl);
         }

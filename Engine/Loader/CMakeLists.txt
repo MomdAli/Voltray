@@ -17,7 +17,6 @@ target_link_libraries(VoltrayEngineLoader PUBLIC
     VoltrayUtils
     assimp
     VoltrayEngineGraphics
-    VoltrayEditorComponents
 )
 
 # Alias for consistent naming

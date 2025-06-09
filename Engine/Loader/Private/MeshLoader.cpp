@@ -1,10 +1,8 @@
 #include "MeshLoader.h"
-#include "Console.h"
 #include "IFormatLoader.h"
 #include <filesystem>
 #include <algorithm>
-
-using Voltray::Editor::Components::Console;
+#include <iostream>
 
 namespace Voltray::Engine
 {
@@ -13,7 +11,7 @@ namespace Voltray::Engine
         auto meshes = LoadMeshes(filepath);
         if (meshes.empty())
         {
-            Console::PrintError("Failed to load any mesh from: " + filepath);
+            std::cerr << "Error: Failed to load any mesh from: " << filepath << std::endl;
             return nullptr;
         }
 
@@ -23,16 +21,14 @@ namespace Voltray::Engine
     std::vector<std::shared_ptr<Mesh>> MeshLoader::LoadMeshes(const std::string &filepath)
     {
         std::vector<std::shared_ptr<Mesh>> meshes;
-
         if (!std::filesystem::exists(filepath))
         {
-            Console::PrintError("File does not exist: " + filepath);
+            std::cerr << "Error: File does not exist: " << filepath << std::endl;
             return meshes;
         }
-
         if (!IsFormatSupported(filepath))
         {
-            Console::PrintError("Unsupported file format: " + filepath);
+            std::cerr << "Error: Unsupported file format: " << filepath << std::endl;
             return meshes;
         }
 
@@ -59,16 +55,16 @@ namespace Voltray::Engine
 
             if (!loader)
             {
-                Console::PrintError("No loader available for extension: " + extension);
+                std::cerr << "Error: No loader available for extension: " << extension << std::endl;
                 return {};
             }
 
-            Console::Print("Using " + loader->GetLoaderName() + " for file: " + filepath);
+            std::cout << "Using " << loader->GetLoaderName() << " for file: " << filepath << std::endl;
             return loader->LoadMeshData(filepath);
         }
         catch (const std::exception &e)
         {
-            Console::PrintError("Error loading mesh: " + std::string(e.what()));
+            std::cerr << "Error: Error loading mesh: " << e.what() << std::endl;
             return {};
         }
     }

@@ -1,9 +1,16 @@
 # Build files
 build/
+build-*/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
+
+# Docker related files and artifacts
+artifacts/
+docker-artifacts/
+.docker/
+docker-build-cache/
 
 # Generated documentation (handled by GitHub Actions)
 docs/

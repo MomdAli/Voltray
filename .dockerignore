@@ -1,0 +1,48 @@
+# Ignore Docker build artifacts
+artifacts/
+*.tar.gz
+*.zip
+
+# Docker volumes
+.docker-volumes/
+
+# Build directories in Docker containers and host
+build/
+build-*/
+
+# CMake generated files that could conflict
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# IDE files that shouldn't be in containers
+.vscode/
+.idea/
+*.sdf
+*.suo
+*.user
+*.opensdf
+*.VC.db
+
+# Logs and temp files
+logs/
+*.log
+*.tmp
+debug_startup.txt
+resource_debug_output.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation (generated)
+docs/
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+*.o
