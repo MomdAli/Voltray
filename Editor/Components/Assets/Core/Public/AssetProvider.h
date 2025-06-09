@@ -11,6 +11,7 @@
 #pragma once
 
 #include "AssetItem.h"
+#include "AssetFilter.h"
 #include <vector>
 #include <filesystem>
 #include <string>
@@ -55,12 +56,22 @@ namespace Voltray::Editor::Components::Assets
          * @brief Get the root directory for this provider
          * @return Root directory path
          */
-        virtual std::filesystem::path GetRootDirectory() const = 0;
+        virtual std::filesystem::path GetRootDirectory() const = 0; /**
+                                                                     * @brief Get display name for this provider
+                                                                     * @return Display name (e.g., "Global Assets", "Scene Assets")
+                                                                     */
+        virtual std::string GetDisplayName() const = 0;
 
         /**
-         * @brief Get display name for this provider
-         * @return Display name (e.g., "Global Assets", "Scene Assets")
+         * @brief Get the asset filter for this provider
+         * @return Reference to the asset filter
          */
-        virtual std::string GetDisplayName() const = 0;
+        virtual AssetFilter &GetAssetFilter() = 0;
+
+        /**
+         * @brief Get the asset filter for this provider (const version)
+         * @return Const reference to the asset filter
+         */
+        virtual const AssetFilter &GetAssetFilter() const = 0;
     };
 }

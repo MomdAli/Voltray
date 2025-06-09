@@ -1,8 +1,12 @@
 #include "AssetBrowserWidget.h"
 #include "GlobalAssetProvider.h"
 #include "LocalAssetProvider.h"
+#include "AssetFilter.h"
 #include "UserDataManager.h"
 #include "FileOperations.h"
+#include "Workspace.h"
+#include "EditorApp.h"
+#include "Console.h"
 #include <imgui.h>
 #include <algorithm>
 #include <filesystem>
@@ -16,12 +20,38 @@ namespace Voltray::Editor::Components::Assets
                                            AssetOperations &operations,
                                            AssetDragDrop &dragDrop)
         : m_Provider(provider), m_Renderer(renderer), m_Operations(operations), m_DragDrop(dragDrop),
-          m_CurrentDirectory("."), m_ViewMode(AssetViewMode::Grid), m_IconSize(64.0f), m_NeedsRefresh(true),
+          m_ViewMode(AssetViewMode::Grid), m_IconSize(80.0f), m_NeedsRefresh(true),
           m_CurrentAssetView(AssetView::Global), m_RecursiveSearch(false)
     {
         // Initialize asset providers
         m_GlobalProvider = std::make_shared<GlobalAssetProvider>();
         m_LocalProvider = std::make_shared<LocalAssetProvider>();
+
+        m_CurrentDirectory = UserDataManager::GetGlobalAssetsDirectory();
+
+        // Set initial provider based on current view
+        SetAssetView(m_CurrentAssetView);
+
+        if (m_Provider)
+        {
+            Refresh();
+        }
+    }
+
+    AssetBrowserWidget::AssetBrowserWidget(std::shared_ptr<AssetProvider> globalProvider,
+                                           std::shared_ptr<AssetProvider> localProvider,
+                                           AssetRenderer &renderer,
+                                           AssetOperations &operations,
+                                           AssetDragDrop &dragDrop)
+        : m_Provider(globalProvider), m_Renderer(renderer), m_Operations(operations), m_DragDrop(dragDrop),
+          m_ViewMode(AssetViewMode::Grid), m_IconSize(80.0f), m_NeedsRefresh(true),
+          m_CurrentAssetView(AssetView::Global), m_RecursiveSearch(false)
+    {
+        // Use the provided asset providers
+        m_GlobalProvider = globalProvider;
+        m_LocalProvider = localProvider;
+
+        m_CurrentDirectory = UserDataManager::GetGlobalAssetsDirectory();
 
         // Set initial provider based on current view
         SetAssetView(m_CurrentAssetView);
@@ -136,8 +166,7 @@ namespace Voltray::Editor::Components::Assets
             }
             catch (const std::exception &e)
             {
-                // Handle any filesystem errors gracefully
-                // Could log error here if logging system is available
+                Console::PrintError("Error during recursive search: " + std::string(e.what()));
             }
         }
     }
@@ -161,16 +190,21 @@ namespace Voltray::Editor::Components::Assets
                 break;
 
             case AssetView::Local:
+            {
                 m_Provider = m_LocalProvider;
-                // Set to local workspace directory
-                SetCurrentDirectory(".");
-                break;
-
-            case AssetView::Scene:
-                m_Provider = m_LocalProvider; // For now, use local provider for scene assets
-                // TODO: Implement scene-specific provider or filtering
-                SetCurrentDirectory(".");
-                break;
+                // Set to current workspace assets directory
+                auto workspace = Voltray::Editor::EditorApp::Get()->GetCurrentWorkspace();
+                if (workspace && workspace->IsPathValid())
+                {
+                    SetCurrentDirectory(workspace->path);
+                }
+                else
+                {
+                    // If no valid workspace, set to user data directory
+                    SetCurrentDirectory(".");
+                }
+            }
+            break;
             }
 
             m_NeedsRefresh = true;
@@ -182,17 +216,36 @@ namespace Voltray::Editor::Components::Assets
         return m_CurrentAssetView;
     }
 
+    void AssetBrowserWidget::UpdateLocalProvider(const std::filesystem::path &path)
+    {
+        if (m_LocalProvider)
+        {
+            // Reinitialize the local provider with the new path
+            if (auto localProvider = std::dynamic_pointer_cast<LocalAssetProvider>(m_LocalProvider))
+            {
+                localProvider->Initialize(path.string());
+
+                // If we're currently viewing local assets, refresh the view
+                if (m_CurrentAssetView == AssetView::Local)
+                {
+                    SetCurrentDirectory(path / "Assets");
+                    m_NeedsRefresh = true;
+                }
+            }
+        }
+    }
+
     void AssetBrowserWidget::RenderToolbar()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
 
         // Asset view selector
-        const char *viewNames[] = {"Global", "Local", "Scene"};
+        const char *viewNames[] = {"Global", "Local"};
         int currentView = static_cast<int>(m_CurrentAssetView);
         ImGui::Text("Assets:");
         ImGui::SameLine();
         ImGui::SetNextItemWidth(100.0f);
-        if (ImGui::Combo("##AssetView", &currentView, viewNames, 3))
+        if (ImGui::Combo("##AssetView", &currentView, viewNames, 2))
         {
             SetAssetView(static_cast<AssetView>(currentView));
         }
@@ -246,14 +299,26 @@ namespace Voltray::Editor::Components::Assets
         {
             m_SearchFilter = std::string(searchBuffer);
             m_NeedsRefresh = true;
-        }
-
-        // Recursive search checkbox
+        } // Recursive search checkbox
         ImGui::SameLine();
         if (ImGui::Checkbox("Recursive", &m_RecursiveSearch))
         {
             m_NeedsRefresh = true;
         }
+
+        // Filter controls
+        ImGui::SameLine();
+        ImGui::Separator();
+        ImGui::SameLine();
+
+        // Filter button that opens popup
+        if (ImGui::Button("Filters"))
+        {
+            ImGui::OpenPopup("FilterOptions");
+        }
+
+        // Filter popup
+        RenderFilterPopup();
 
         // Refresh button
         ImGui::SameLine();
@@ -376,7 +441,35 @@ namespace Voltray::Editor::Components::Assets
                 else
                 {
                     // Handle file selection/opening
-                    // TODO: Implement file opening logic
+                    // Open file with default system application (like in file explorer)
+                    if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                    {
+                        try
+                        {
+                            std::filesystem::path filePath = item.path;
+                            if (std::filesystem::exists(filePath))
+                            {
+#ifdef _WIN32
+                                // Windows - use ShellExecute
+                                std::string command = "start \"\" \"" + filePath.string() + "\"";
+                                system(command.c_str());
+#elif __APPLE__
+                                // macOS - use open command
+                                std::string command = "open \"" + filePath.string() + "\"";
+                                system(command.c_str());
+#else
+                                // Linux - use xdg-open
+                                std::string command = "xdg-open \"" + filePath.string() + "\"";
+                                system(command.c_str());
+#endif
+                            }
+                        }
+                        catch (const std::exception &e)
+                        {
+                            // Handle error silently or log if logging system available
+                            Console::PrintError("Failed to open file: " + std::string(e.what()));
+                        }
+                    }
                 }
                 break;
             }
@@ -397,6 +490,127 @@ namespace Voltray::Editor::Components::Assets
                     break;
                 }
             }
+        }
+    }
+
+    void AssetBrowserWidget::RenderFilterPopup()
+    {
+        if (ImGui::BeginPopup("FilterOptions"))
+        {
+            ImGui::Text("File Filter Options");
+            ImGui::Separator();
+
+            if (!m_Provider)
+            {
+                ImGui::Text("No provider available");
+                ImGui::EndPopup();
+                return;
+            }
+
+            AssetFilter &filter = m_Provider->GetAssetFilter();
+            bool changed = false;
+
+            // Category filtering options
+            ImGui::Text("Filter Categories:");
+            ImGui::Indent();
+
+            // System files
+            bool systemFiltered = filter.IsCategoryFiltered(AssetFilterCategory::System);
+            if (ImGui::Checkbox("System Files (tmp, cache, logs)", &systemFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::System, systemFiltered);
+                changed = true;
+            }
+
+            // Project files
+            bool projectFiltered = filter.IsCategoryFiltered(AssetFilterCategory::Project);
+            if (ImGui::Checkbox("Project Files (vcxproj, cmake, etc.)", &projectFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::Project, projectFiltered);
+                changed = true;
+            }
+
+            // IDE files
+            bool ideFiltered = filter.IsCategoryFiltered(AssetFilterCategory::IDE);
+            if (ImGui::Checkbox("IDE Files (.vscode, .vs, etc.)", &ideFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::IDE, ideFiltered);
+                changed = true;
+            }
+
+            // Version control files
+            bool vcFiltered = filter.IsCategoryFiltered(AssetFilterCategory::VersionControl);
+            if (ImGui::Checkbox("Version Control (.git, .svn, etc.)", &vcFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::VersionControl, vcFiltered);
+                changed = true;
+            }
+
+            // Archive files
+            bool archiveFiltered = filter.IsCategoryFiltered(AssetFilterCategory::Archive);
+            if (ImGui::Checkbox("Archive Files (zip, rar, etc.)", &archiveFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::Archive, archiveFiltered);
+                changed = true;
+            }
+
+            // Executable files
+            bool execFiltered = filter.IsCategoryFiltered(AssetFilterCategory::Executable);
+            if (ImGui::Checkbox("Executable Files (exe, dll, etc.)", &execFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::Executable, execFiltered);
+                changed = true;
+            }
+
+            // Media files
+            bool mediaFiltered = filter.IsCategoryFiltered(AssetFilterCategory::Media);
+            if (ImGui::Checkbox("Large Media Files (video, audio, 3D)", &mediaFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::Media, mediaFiltered);
+                changed = true;
+            }
+
+            // Document files
+            bool docFiltered = filter.IsCategoryFiltered(AssetFilterCategory::Document);
+            if (ImGui::Checkbox("Document Files (pdf, doc, etc.)", &docFiltered))
+            {
+                filter.SetCategoryFiltering(AssetFilterCategory::Document, docFiltered);
+                changed = true;
+            }
+
+            ImGui::Unindent();
+            ImGui::Separator();
+
+            // Reset to defaults button
+            if (ImGui::Button("Reset to Defaults"))
+            {
+                filter.ResetToDefaults();
+                changed = true;
+            }
+
+            ImGui::SameLine();
+
+            // Custom extension input
+            static char customExtBuffer[64] = "";
+            ImGui::Text("Add Custom Filter:");
+            ImGui::SetNextItemWidth(120.0f);
+            if (ImGui::InputText("##CustomExt", customExtBuffer, sizeof(customExtBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                std::string ext = customExtBuffer;
+                if (!ext.empty())
+                {
+                    filter.AddFilteredExtension(ext);
+                    customExtBuffer[0] = '\0'; // Clear input
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                m_NeedsRefresh = true;
+            }
+
+            ImGui::EndPopup();
         }
     }
 }

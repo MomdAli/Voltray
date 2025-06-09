@@ -8,17 +8,18 @@
 #include "AssetOperations.h"
 #include "IconRenderer.h"
 #include "AssetDragDrop.h"
+#include "Workspace.h"
 #include <memory>
 
 /**
- * @file AssetsPanelRefactored.h
+ * @file AssetsPanel.h
  * @brief Defines the new refactored Assets panel component for the Editor.
  */
 
 namespace Voltray::Editor::Components::Assets
 {
     /**
-     * @class AssetsPanelRefactored
+     * @class AssetsPanel
      * @brief A panel component responsible for managing and displaying asset resources using the new clean architecture.
      * @extends Panel
      *
@@ -28,19 +29,25 @@ namespace Voltray::Editor::Components::Assets
      * - AssetOperations for file operations
      * - AssetBrowserWidget as the main UI coordinator
      */
-    class AssetsPanelRefactored : public Panel
+    class AssetsPanel : public Panel
     {
     public:
         /**
          * @brief Construct the refactored assets panel
          */
-        AssetsPanelRefactored();
+        AssetsPanel();
 
         /**
          * @brief Renders the Assets panel content.
          * @details Implements the abstract Draw method from the Panel base class.
          */
         void Draw() override;
+
+        /**
+         * @brief Called when the workspace changes
+         * @param workspace The new workspace to use
+         */
+        void OnWorkspaceChanged(const Voltray::Utils::Workspace &workspace);
 
     private:
         // Asset browser widget (main UI coordinator)

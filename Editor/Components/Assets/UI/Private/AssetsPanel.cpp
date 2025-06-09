@@ -1,19 +1,19 @@
-#include "AssetsPanelRefactored.h"
+#include "AssetsPanel.h"
 #include "EditorApp.h"
 #include "UserDataManager.h"
 #include <imgui.h>
 
 namespace Voltray::Editor::Components::Assets
 {
-    AssetsPanelRefactored::AssetsPanelRefactored()
+    AssetsPanel::AssetsPanel()
         : m_initialized(false)
     {
         // Components will be initialized on first Draw call
     }
 
-    void AssetsPanelRefactored::Draw()
+    void AssetsPanel::Draw()
     {
-        ImGui::Begin("Assets (Refactored)");
+        ImGui::Begin("Assets");
 
         // Initialize components on first use
         if (!m_initialized)
@@ -35,7 +35,7 @@ namespace Voltray::Editor::Components::Assets
         ImGui::End();
     }
 
-    void AssetsPanelRefactored::InitializeComponents()
+    void AssetsPanel::InitializeComponents()
     {
         try
         {
@@ -48,10 +48,6 @@ namespace Voltray::Editor::Components::Assets
             m_globalProvider = std::make_shared<GlobalAssetProvider>();
             m_localProvider = std::make_shared<LocalAssetProvider>();
 
-            // Initialize providers
-            std::string globalPath = Voltray::Utils::UserDataManager::GetGlobalAssetsDirectory().string();
-            m_globalProvider->Initialize(globalPath);
-
             // Set local provider path based on current workspace
             auto currentWorkspace = editorApp->GetCurrentWorkspace();
             if (currentWorkspace)
@@ -62,15 +58,18 @@ namespace Voltray::Editor::Components::Assets
             {
                 // Default to current directory if no workspace
                 m_localProvider->Initialize(".");
-            } // Create renderer and operations components
+            }
+
+            std::string globalPath = Voltray::Utils::UserDataManager::GetGlobalAssetsDirectory().string();
+            m_globalProvider->Initialize(globalPath);
+
             m_iconRenderer = std::make_unique<IconRenderer>();
             m_renderer = std::make_unique<AssetRenderer>(*m_iconRenderer);
             m_operations = std::make_unique<AssetOperations>();
-            m_dragDrop = std::make_unique<AssetDragDrop>();
-
-            // Create the main asset browser widget - start with global provider
+            m_dragDrop = std::make_unique<AssetDragDrop>(); // Create the main asset browser widget with both providers
             m_assetBrowserWidget = std::make_unique<AssetBrowserWidget>(
                 m_globalProvider,
+                m_localProvider,
                 *m_renderer,
                 *m_operations,
                 *m_dragDrop);
@@ -79,8 +78,30 @@ namespace Voltray::Editor::Components::Assets
         }
         catch (const std::exception &e)
         {
-            // Log error or handle initialization failure
+            std::cerr << "Error initializing AssetsPanel: " << e.what() << std::endl;
             m_initialized = false;
+        }
+    }
+    void AssetsPanel::OnWorkspaceChanged(const Voltray::Utils::Workspace &workspace)
+    {
+        if (!m_initialized)
+        {
+            InitializeComponents();
+        }
+
+        // Update local asset provider with new workspace path
+        if (m_localProvider)
+        {
+            std::filesystem::path assetsPath = workspace.path / "Assets";
+            m_localProvider->Initialize(assetsPath.string());
+        }
+
+        // Update the asset browser widget's local provider and switch to local view
+        if (m_assetBrowserWidget)
+        {
+            m_assetBrowserWidget->UpdateLocalProvider(workspace.path);
+            m_assetBrowserWidget->SetAssetView(AssetView::Local);
+            m_assetBrowserWidget->Refresh();
         }
     }
 }

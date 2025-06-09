@@ -72,36 +72,10 @@ namespace Voltray::Editor::Components::Assets
 
         return items;
     }
-
     bool GlobalAssetProvider::ShouldShowFile(const std::filesystem::path &path,
                                              const std::string &searchFilter) const
     {
-        const std::string filename = path.filename().string();
-
-        // Skip hidden files and system files
-        if (filename.empty() || filename[0] == '.')
-        {
-            return false;
-        }
-
-        // Apply search filter if provided
-        if (!searchFilter.empty())
-        {
-            std::string lowerFilename = filename;
-            std::string lowerFilter = searchFilter;
-
-            std::transform(lowerFilename.begin(), lowerFilename.end(),
-                           lowerFilename.begin(), ::tolower);
-            std::transform(lowerFilter.begin(), lowerFilter.end(),
-                           lowerFilter.begin(), ::tolower);
-
-            if (lowerFilename.find(lowerFilter) == std::string::npos)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return m_AssetFilter.ShouldShowFile(path, searchFilter);
     }
 
     AssetItem GlobalAssetProvider::CreateAssetItem(const std::filesystem::path &path) const

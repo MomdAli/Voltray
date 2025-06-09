@@ -2,7 +2,7 @@
 add_library(VoltrayEditorComponentsAssetsUI STATIC
     Private/AssetRenderer.cpp
     Private/AssetBrowserWidget.cpp
-    Private/AssetsPanelRefactored.cpp
+    Private/AssetsPanel.cpp
 )
 
 # Set include directories for this library

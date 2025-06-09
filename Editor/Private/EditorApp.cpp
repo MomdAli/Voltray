@@ -15,7 +15,7 @@
 #include "Toolbar.h"
 #include "Viewport.h"
 #include "Inspector.h"
-#include "AssetsPanelRefactored.h"
+#include "AssetsPanel.h"
 #include "Console.h"
 #include "Settings.h"
 #include "Dockspace.h"
@@ -87,7 +87,7 @@ namespace Voltray::Editor
         m_Toolbar = std::make_unique<Components::Toolbar>();
         m_Viewport = std::make_unique<Components::Viewport>();
         m_Inspector = std::make_unique<Components::Inspector>();
-        m_Assets = std::make_unique<AssetsPanelRefactored>();
+        m_Assets = std::make_unique<AssetsPanel>();
         m_Settings = std::make_unique<Components::Settings>(); // Register panels with default dock regions
         Components::Dockspace::RegisterPanel("Toolbar", m_Toolbar.get(), Components::Dockspace::Region::Top);
         Components::Dockspace::RegisterPanel("Inspector", m_Inspector.get(), Components::Dockspace::Region::Right);
@@ -108,17 +108,13 @@ namespace Voltray::Editor
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        // Show workspace dialog on first frame
+        ImGui::NewFrame(); // Show workspace dialog on first frame
         if (m_ShowWorkspaceDialogOnStartup && !m_WorkspaceInitialized)
         {
             UI::WorkspaceDialog::Show([this](const Voltray::Utils::Workspace *workspace)
                                       {
                 if (workspace) {
-                    m_CurrentWorkspace = std::make_shared<Voltray::Utils::Workspace>(*workspace);
-                    Components::Console::PrintSuccess("Loaded workspace: " + workspace->name);
-                    Components::Console::Print("Workspace path: " + workspace->path.string());
+                    this->OnWorkspaceChanged(*workspace);
                 } else {
                     Components::Console::PrintWarning("No workspace selected. Using default workspace.");
                 }
@@ -185,4 +181,36 @@ namespace Voltray::Editor
 
     // Singleton access
     EditorApp *EditorApp::Get() { return s_Instance; }
+
+    void EditorApp::OnWorkspaceChanged(const Voltray::Utils::Workspace &workspace)
+    {
+        // Update current workspace
+        m_CurrentWorkspace = std::make_shared<Voltray::Utils::Workspace>(workspace);
+
+        // Log workspace change
+        Components::Console::PrintSuccess("Loaded workspace: " + workspace.name);
+        Components::Console::Print("Workspace path: " + workspace.path.string());
+
+        // Update asset providers with new workspace path
+        if (m_Assets)
+        {
+            m_Assets->OnWorkspaceChanged(workspace);
+        }
+
+        // Update other workspace-dependent components
+        UpdateWindowTitle();
+        // Set workspace manager current workspace
+        Voltray::Utils::WorkspaceManager::SetCurrentWorkspace(workspace.path);
+    }
+
+    void EditorApp::UpdateWindowTitle()
+    {
+        // Update window title to include workspace name
+        // Note: This would require access to GLFWwindow, which we'd need to store
+        // For now, we'll just print a message
+        if (m_CurrentWorkspace)
+        {
+            Components::Console::Print("Window title updated for workspace: " + m_CurrentWorkspace->name);
+        }
+    }
 }

@@ -6,14 +6,14 @@
 #include "Toolbar.h"
 #include "Viewport.h"
 #include "Inspector.h"
-#include "AssetsPanelRefactored.h"
+#include "AssetsPanel.h"
 #include "Console.h"
 #include "Settings.h"
 #include "Dockspace.h"
 #include "WorkspaceDialog.h"
 #include "Workspace.h"
 
-using Voltray::Editor::Components::Assets::AssetsPanelRefactored;
+using Voltray::Editor::Components::Assets::AssetsPanel;
 
 /**
  * @file EditorApp.h
@@ -92,11 +92,22 @@ namespace Voltray::Editor
          */
         std::shared_ptr<Voltray::Utils::Workspace> GetCurrentWorkspace() { return m_CurrentWorkspace; }
 
+        /**
+         * @brief Handle workspace change events
+         * @param workspace The newly selected workspace
+         */
+        void OnWorkspaceChanged(const Voltray::Utils::Workspace &workspace);
+
     private:
+        /**
+         * @brief Update window title with current workspace name
+         */
+        void UpdateWindowTitle();
+
         std::unique_ptr<Components::Toolbar> m_Toolbar;
         std::unique_ptr<Components::Viewport> m_Viewport;
         std::unique_ptr<Components::Inspector> m_Inspector;
-        std::unique_ptr<AssetsPanelRefactored> m_Assets;
+        std::unique_ptr<AssetsPanel> m_Assets;
         std::unique_ptr<Components::Settings> m_Settings;
 
         // Panel visibility flags

@@ -44,7 +44,7 @@ The asset system follows a layered architecture with clear separation of respons
 ┌─────────────────────────────────────────────────────────────┐
 │                    UI Layer                                 │
 ├─────────────────────────────────────────────────────────────┤
-│  AssetsPanelRefactored │ AssetBrowserWidget │ NavigationBar │
+│  AssetsPanel │ AssetBrowserWidget │ NavigationBar │
 ├─────────────────────────────────────────────────────────────┤
 │                  Rendering Layer                            │
 ├─────────────────────────────────────────────────────────────┤
@@ -340,17 +340,17 @@ public:
 - Confirmation dialogs
 - Global/local asset awareness
 
-### 5. AssetsPanelRefactored
+### 5. AssetsPanel
 
-**File:** `UI/Public/AssetsPanelRefactored.h`, `UI/Private/AssetsPanelRefactored.cpp`
+**File:** `UI/Public/AssetsPanel.h`, `UI/Private/AssetsPanel.cpp`
 
 The main panel component integrating all asset system components.
 
 ```cpp
-class AssetsPanelRefactored : public Panel
+class AssetsPanel : public Panel
 {
 public:
-    AssetsPanelRefactored();
+    AssetsPanel();
     void Draw() override;
 
 private:
@@ -624,7 +624,7 @@ The system automatically detects asset types based on file extensions and assign
 
 ```cpp
 // Initialize the asset browser
-auto assetPanel = std::make_unique<AssetsPanelRefactored>();
+auto assetPanel = std::make_unique<AssetsPanel>();
 
 // The panel automatically initializes all components
 assetPanel->Draw(); // Renders the complete asset browser UI

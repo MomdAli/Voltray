@@ -1,5 +1,6 @@
 # Editor Components Assets Core module CMakeLists.txt
 add_library(VoltrayEditorComponentsAssetsCore STATIC
+    Private/AssetFilter.cpp
     Private/GlobalAssetProvider.cpp
     Private/LocalAssetProvider.cpp
 )

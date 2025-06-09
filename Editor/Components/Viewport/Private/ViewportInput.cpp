@@ -34,7 +34,19 @@ namespace Voltray::Editor::Components
         {
             handleObjectSelection(scene, camera, viewportPos, viewportSize);
         }
+
+        // Handle deleting selected object on Delete key press
+        if (ImGui::IsItemHovered() && ::Input::IsKeyPressed(GLFW_KEY_DELETE))
+        {
+            auto selectedObject = scene.GetSelectedObject();
+            if (selectedObject)
+            {
+                scene.RemoveObject(selectedObject);
+                scene.ClearSelection(); // Clear selection after deletion
+            }
+        }
     }
+
     void ViewportInput::handleObjectSelection(::Scene &scene, ::BaseCamera &camera, const ImVec2 &viewportPos, const ImVec2 &viewportSize)
     {
         ImVec2 mousePos = ImGui::GetMousePos();

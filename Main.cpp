@@ -16,6 +16,11 @@ using Voltray::Editor::EditorApp;
 #include <limits.h>
 #endif
 
+// Increase stack size for debug builds
+#ifdef _WIN32
+#pragma comment(linker, "/STACK:8388608") // 8MB stack
+#endif
+
 int main()
 {
 #ifdef _WIN32

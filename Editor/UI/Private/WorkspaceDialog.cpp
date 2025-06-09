@@ -13,7 +13,7 @@
 #endif
 
 namespace Voltray::Editor::UI
-{    // Static member definitions
+{ // Static member definitions
     bool WorkspaceDialog::s_IsOpen = false;
     WorkspaceDialog::WorkspaceCallback WorkspaceDialog::s_Callback = nullptr;
     std::vector<Voltray::Utils::Workspace> WorkspaceDialog::s_Workspaces;
@@ -23,7 +23,8 @@ namespace Voltray::Editor::UI
     char WorkspaceDialog::s_NewWorkspaceDescription[512] = "";
     char WorkspaceDialog::s_NewWorkspacePath[1024] = "";
     bool WorkspaceDialog::s_CreateInProgress = false;
-    static int s_PendingSelection = -1;    void WorkspaceDialog::Show(WorkspaceCallback callback)
+    static int s_PendingSelection = -1;
+    void WorkspaceDialog::Show(WorkspaceCallback callback)
     {
         s_IsOpen = true;
         s_Callback = callback;
@@ -69,7 +70,10 @@ namespace Voltray::Editor::UI
             }
             else
             {
-                RenderWorkspaceList();            }            ImGui::EndPopup();
+                RenderWorkspaceList();
+            }
+
+            ImGui::EndPopup();
         }
 
         // Handle pending selection (deferred from double-click)
@@ -113,14 +117,15 @@ namespace Voltray::Editor::UI
                 ImGui::PushID(i);
 
                 // Workspace item
-                bool isSelected = (s_SelectedWorkspace == i);                if (ImGui::Selectable("##workspace", isSelected, ImGuiSelectableFlags_AllowDoubleClick))
+                bool isSelected = (s_SelectedWorkspace == i);
+                if (ImGui::Selectable("##workspace", isSelected, ImGuiSelectableFlags_AllowDoubleClick))
                 {
                     s_SelectedWorkspace = i;
-                      // Double-click to select
+                    // Double-click to select
                     if (ImGui::IsMouseDoubleClicked(0))
                     {
                         s_PendingSelection = i;
-                        ImGui::PopID(); // Clean up ID before early return
+                        ImGui::PopID();    // Clean up ID before early return
                         ImGui::EndChild(); // End the child window before early return
                         return;
                     }
@@ -196,7 +201,8 @@ namespace Voltray::Editor::UI
             Close();
         }
 
-        ImGui::SameLine();        ImGui::BeginDisabled(s_SelectedWorkspace < 0 || s_SelectedWorkspace >= static_cast<int>(s_Workspaces.size()));
+        ImGui::SameLine();
+        ImGui::BeginDisabled(s_SelectedWorkspace < 0 || s_SelectedWorkspace >= static_cast<int>(s_Workspaces.size()));
         if (ImGui::Button("Open Workspace"))
         {
             if (s_SelectedWorkspace >= 0 && s_SelectedWorkspace < static_cast<int>(s_Workspaces.size()))
@@ -303,7 +309,7 @@ namespace Voltray::Editor::UI
             std::cout << "Successfully created workspace: " << s_NewWorkspaceName << std::endl;
 
             // Refresh the list and select the new workspace
-            RefreshWorkspaceList();            // Find and select the newly created workspace
+            RefreshWorkspaceList(); // Find and select the newly created workspace
             for (int i = 0; i < static_cast<int>(s_Workspaces.size()); ++i)
             {
                 if (s_Workspaces[i].path == fullPath)

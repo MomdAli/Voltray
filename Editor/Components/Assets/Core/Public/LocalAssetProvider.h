@@ -39,6 +39,9 @@ namespace Voltray::Editor::Components::Assets
 
         std::string GetDisplayName() const override { return "Scene Assets"; }
 
+        AssetFilter &GetAssetFilter() override { return m_AssetFilter; }
+        const AssetFilter &GetAssetFilter() const override { return m_AssetFilter; }
+
         /**
          * @brief Set the current scene directory
          * @param sceneDirectory Path to scene assets directory
@@ -47,6 +50,7 @@ namespace Voltray::Editor::Components::Assets
 
     private:
         std::filesystem::path m_RootDirectory;
+        AssetFilter m_AssetFilter;
 
         /**
          * @brief Check if a file should be displayed

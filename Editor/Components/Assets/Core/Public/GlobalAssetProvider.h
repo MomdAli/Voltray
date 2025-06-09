@@ -40,8 +40,12 @@ namespace Voltray::Editor::Components::Assets
 
         std::string GetDisplayName() const override { return "Global Assets"; }
 
+        AssetFilter &GetAssetFilter() override { return m_AssetFilter; }
+        const AssetFilter &GetAssetFilter() const override { return m_AssetFilter; }
+
     private:
         std::filesystem::path m_RootDirectory;
+        AssetFilter m_AssetFilter;
 
         /**
          * @brief Check if a file should be displayed

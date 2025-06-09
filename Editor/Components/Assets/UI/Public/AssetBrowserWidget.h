@@ -29,7 +29,6 @@ namespace Voltray::Editor::Components::Assets
     {
         Global, ///< Global assets (shared across all projects)
         Local,  ///< Local workspace assets
-        Scene   ///< Scene-specific assets
     };
 
     /**
@@ -44,6 +43,20 @@ namespace Voltray::Editor::Components::Assets
     {
     public:
         AssetBrowserWidget(std::shared_ptr<AssetProvider> provider,
+                           AssetRenderer &renderer,
+                           AssetOperations &operations,
+                           AssetDragDrop &dragDrop);
+
+        /**
+         * @brief Alternative constructor that accepts both global and local providers
+         * @param globalProvider Global asset provider
+         * @param localProvider Local asset provider
+         * @param renderer Asset renderer
+         * @param operations Asset operations
+         * @param dragDrop Drag and drop handler
+         */
+        AssetBrowserWidget(std::shared_ptr<AssetProvider> globalProvider,
+                           std::shared_ptr<AssetProvider> localProvider,
                            AssetRenderer &renderer,
                            AssetOperations &operations,
                            AssetDragDrop &dragDrop);
@@ -107,6 +120,12 @@ namespace Voltray::Editor::Components::Assets
          */
         AssetView GetAssetView() const;
 
+        /**
+         * @brief Update the local asset provider with a new path
+         * @param path New path for local assets
+         */
+        void UpdateLocalProvider(const std::filesystem::path &path);
+
     private:
         std::shared_ptr<AssetProvider> m_Provider;
         AssetRenderer &m_Renderer;
@@ -125,12 +144,15 @@ namespace Voltray::Editor::Components::Assets
         // Asset view tracking
         AssetView m_CurrentAssetView = AssetView::Global;
         std::shared_ptr<AssetProvider> m_GlobalProvider;
-        std::shared_ptr<AssetProvider> m_LocalProvider;
+        std::shared_ptr<AssetProvider> m_LocalProvider; /**
+                                                         * @brief Render the toolbar with view controls and search
+                                                         */
+        void RenderToolbar();
 
         /**
-         * @brief Render the toolbar with view controls and search
+         * @brief Render the filter options popup
          */
-        void RenderToolbar();
+        void RenderFilterPopup();
 
         /**
          * @brief Render the navigation breadcrumb

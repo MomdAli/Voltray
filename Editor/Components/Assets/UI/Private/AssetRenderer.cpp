@@ -49,7 +49,7 @@ namespace Voltray::Editor::Components::Assets
             // Calculate icon position (centered)
             ImVec2 iconPos;
             iconPos.x = itemMin.x + (itemWidth - iconSize) * 0.5f;
-            iconPos.y = itemMin.y + 4.0f;            // Render icon
+            iconPos.y = itemMin.y + 4.0f; // Render icon
             bool isHovered = ImGui::IsItemHovered();
             m_IconRenderer.RenderFileIcon(
                 ImGui::GetWindowDrawList(),
@@ -57,7 +57,7 @@ namespace Voltray::Editor::Components::Assets
                 iconSize,
                 item.path.extension().string(),
                 item.isDirectory,
-                false,      // TODO: Add selection state
+                selectedPath == item.path.string(), // Add selection state
                 isHovered);
 
             // Render filename for both files and folders, but keep it clean

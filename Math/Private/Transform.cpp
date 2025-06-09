@@ -209,5 +209,4 @@ namespace Voltray::Math
         m_MeshCenter = Vec3(0.0f, 0.0f, 0.0f);
         InvalidateMatrix();
     }
-
 }
