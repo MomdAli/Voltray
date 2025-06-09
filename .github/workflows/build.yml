@@ -40,6 +40,7 @@ jobs:
 
     - name: Create package
       working-directory: ${{ env.BUILD_DIR }}
+      shell: cmd
       run: |
         if not exist Voltray-windows mkdir Voltray-windows
         copy ${{ env.BUILD_TYPE }}\Voltray.exe Voltray-windows\
