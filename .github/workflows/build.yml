@@ -21,6 +21,13 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Fetch all history for proper versioning
+    - name: Cache CMake build output
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.BUILD_DIR }}
+        key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-
 
     - name: Set up MSVC Developer Command Prompt
       uses: ilammy/msvc-dev-cmd@v1
@@ -52,6 +59,13 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: Cache CMake build output
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.BUILD_DIR }}
+        key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-
 
     - name: Install dependencies
       run: |
@@ -86,6 +100,13 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: Cache CMake build output
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.BUILD_DIR }}
+        key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-
 
     - name: Install dependencies
       run: |
