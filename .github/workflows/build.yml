@@ -2,9 +2,9 @@ name: Voltray CI/CD
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev ]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev ]
   workflow_dispatch:  # Allows manual triggering
 
 env:
