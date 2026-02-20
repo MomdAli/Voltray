@@ -1,0 +1,29 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: c++17
+
+# Enforce some basic rules mentioned in the code style
+# Or just use the defaults of LLVM which are widely accepted for C++
+UseTab: Never
+IndentWidth: 4
+TabWidth: 4
+ColumnLimit: 120
+
+# Pointer Alignment
+PointerAlignment: Left
+
+# Braces
+BreakBeforeBraces: Attach
+
+# Spaces
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: true
+
+# Access Modifiers
+AccessModifierOffset: -4
+
+# Include Blocks
+IncludeBlocks: Regroup
+
+...
