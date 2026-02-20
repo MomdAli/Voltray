@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 # Enable CTest framework for automated testing
 enable_testing()
 
+# Basic CTest smoke test to verify testing infrastructure
+add_test(NAME VoltrayCTestSmoke
+         COMMAND ${CMAKE_COMMAND} -E echo "Voltray CTest infrastructure is working")
 # Prevent GLFW from using Wayland
 set(GLFW_BUILD_WAYLAND OFF)
 
