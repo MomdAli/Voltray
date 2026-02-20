@@ -30,7 +30,11 @@ resource_debug_output.txt
 *.dylib
 
 # IDE-specific files
-.vscode/
+.vscode/*
+!.vscode/c_cpp_properties.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 .idea/
 *.sdf
 *.suo
