@@ -153,7 +153,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-format clang-tidy cmake
+        sudo apt-get install -y cmake build-essential xorg-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev clang-format clang-tidy
 
     - name: Check Code Formatting (clang-format)
       run: |
