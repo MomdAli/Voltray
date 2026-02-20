@@ -157,14 +157,14 @@ jobs:
 
     - name: Check Code Formatting (clang-format)
       run: |
-        find . \( -name "*.h" -o -name "*.cpp" \) -not -path "./Vendor/*" -not -path "./build/*" | xargs clang-format --dry-run -Werror
+        find . \( -name "*.h" -o -name "*.cpp" \) -not -path "./Vendor/*" -not -path "./build/*" -print0 | xargs -0 -r clang-format --dry-run -Werror
 
     - name: Configure CMake for Static Analysis
       run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
     - name: Run Static Analysis (clang-tidy)
       run: |
-        find . \( -name "*.h" -o -name "*.cpp" \) -not -path "./Vendor/*" -not -path "./build/*" | xargs clang-tidy -p ${{ env.BUILD_DIR }}
+        find . \( -name "*.h" -o -name "*.cpp" \) -not -path "./Vendor/*" -not -path "./build/*" -print0 | xargs -0 -r clang-tidy -p ${{ env.BUILD_DIR }}
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
