@@ -51,6 +51,12 @@ namespace Voltray::Utils
         static std::string GetApplicationDirectory();
 
         /**
+         * @brief Get the project root directory
+         * @return Path to the project root
+         */
+        static std::string GetProjectRoot();
+
+        /**
          * @brief Check if a resource file exists in workspace or global assets
          * @param relativePath Relative path to the resource
          * @param workspacePath Optional path to current workspace, if empty uses global assets

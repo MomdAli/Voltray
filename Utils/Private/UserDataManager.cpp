@@ -93,6 +93,10 @@ namespace Voltray::Utils
             {
                 // Try to find Resources in application directory first
                 auto resourcesPath = std::filesystem::path(ResourceManager::GetApplicationDirectory()) / "Resources";
+                if (!std::filesystem::exists(resourcesPath))
+                {
+                    resourcesPath = std::filesystem::path(ResourceManager::GetProjectRoot()) / "Resources";
+                }
 
                 if (std::filesystem::exists(resourcesPath))
                 {
@@ -249,6 +253,10 @@ namespace Voltray::Utils
         {
             // Try to get the Resources path relative to the application
             auto resourcesPath = std::filesystem::path(ResourceManager::GetApplicationDirectory()) / "Resources";
+            if (!std::filesystem::exists(resourcesPath))
+            {
+                resourcesPath = std::filesystem::path(ResourceManager::GetProjectRoot()) / "Resources";
+            }
 
             if (std::filesystem::exists(resourcesPath))
             {
@@ -299,8 +307,12 @@ namespace Voltray::Utils
     {
         try
         {
-            // Check if Resources folder exists in the application directory
+            // Check if Resources folder exists in the application directory or project root
             auto resourcesPath = std::filesystem::path(ResourceManager::GetApplicationDirectory()) / "Resources";
+            if (!std::filesystem::exists(resourcesPath))
+            {
+                resourcesPath = std::filesystem::path(ResourceManager::GetProjectRoot()) / "Resources";
+            }
             bool hasResources = std::filesystem::exists(resourcesPath);
 
             // Check if we're in a typical development build structure

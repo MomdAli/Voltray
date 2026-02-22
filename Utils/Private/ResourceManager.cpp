@@ -85,6 +85,11 @@ namespace Voltray::Utils
         return s_applicationDirectory;
     }
 
+    std::string ResourceManager::GetProjectRoot()
+    {
+        return s_projectRoot;
+    }
+
     bool ResourceManager::ResourceExists(const std::string &relativePath, const std::string &workspacePath)
     {
         return !GetResourcePath(relativePath, workspacePath).empty();
