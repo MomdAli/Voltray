@@ -117,18 +117,18 @@ using namespace VM;
 ## File Organization
 
 ### Directory Structure
-- Use `Public/` and `Private/` subdirectories for better code organization
-- `Public/` contains headers that are part of the public API
-- `Private/` contains implementation details and internal headers
+- Use `public/` and `private/` subdirectories for better code organization
+- `public/` contains headers that are part of the public API
+- `private/` contains implementation details and internal headers
 
 ```
 Math/
-├── Public/
+├── public/
 │   ├── Vec3.h
 │   ├── Mat4.h
 │   ├── Transform.h
 │   └── MathUtil.h
-├── Private/
+├── private/
 │   ├── Vec3.cpp
 │   ├── Mat4.cpp
 │   └── Transform.cpp
@@ -160,7 +160,7 @@ namespace Voltray::Engine::Scene {
  */
 class SceneManager {
 public:
-    // Public methods first
+    // public methods first
     SceneManager();
     ~SceneManager();
 
@@ -168,7 +168,7 @@ public:
     void AddObject(std::shared_ptr<SceneObject> object);
 
 private:
-    // Private members last
+    // private members last
     std::vector<std::shared_ptr<SceneObject>> m_Objects;
 };
 
@@ -308,7 +308,7 @@ namespace Voltray::Engine::Scene {
  */
 class SceneManager {
 public:
-    // Public methods first
+    // public methods first
     SceneManager();
     ~SceneManager();
 
@@ -316,7 +316,7 @@ public:
     void AddObject(std::shared_ptr<SceneObject> object);
 
 private:
-    // Private members last
+    // private members last
     std::vector<std::shared_ptr<SceneObject>> m_Objects;
 };
 
