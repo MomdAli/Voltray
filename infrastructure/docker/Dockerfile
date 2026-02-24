@@ -93,7 +93,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy built application from builder stage
 COPY --from=builder /workspace/build/Voltray /usr/local/bin/voltray
-COPY --from=builder /workspace/Shaders /usr/local/share/voltray/Shaders
+COPY --from=builder /workspace/shaders /usr/local/share/voltray/shaders
 
 # Create application user
 RUN useradd -m -s /bin/bash voltray

@@ -11,7 +11,7 @@ add_library(VoltrayEditorComponentsViewport STATIC
 target_include_directories(VoltrayEditorComponentsViewport PUBLIC
     public
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/Vendor/glad/include
+    ${CMAKE_SOURCE_DIR}/vendor/glad/include
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}
     ${glfw_SOURCE_DIR}/include

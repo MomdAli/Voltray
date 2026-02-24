@@ -7,7 +7,7 @@ add_library(VoltrayEngineInput STATIC
 target_include_directories(VoltrayEngineInput PUBLIC
     public
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/Vendor/glad/include
+    ${CMAKE_SOURCE_DIR}/vendor/glad/include
     ${glfw_SOURCE_DIR}/include
 )
 

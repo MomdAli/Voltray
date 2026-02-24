@@ -1,7 +1,7 @@
 # Voltray
 A modern, cross-platform C++ real-time rendering engine with an integrated editor.
 
-![Voltray Editor](Screenshots/Screenshot-1.png)
+![Voltray Editor](screenshots/Screenshot-1.png)
 
 <div align="center">
 

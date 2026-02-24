@@ -44,7 +44,7 @@ if errorlevel 1 (
 )
 
 REM Extract shaders
-docker cp "%container_id%:/workspace/Shaders" "artifacts/Shaders-%platform%" 2>nul
+docker cp "%container_id%:/workspace/shaders" "artifacts/shaders-%platform%" 2>nul
 
 REM Clean up container
 docker rm "%container_id%" >nul
@@ -73,7 +73,7 @@ REM Ubuntu package
 if exist "Voltray-linux.exe" (
     if not exist voltray-linux mkdir voltray-linux
     copy "Voltray-linux.exe" "voltray-linux\voltray.exe" >nul
-    if exist "Shaders-ubuntu" xcopy /E /I "Shaders-ubuntu" "voltray-linux\Shaders" >nul
+    if exist "shaders-ubuntu" xcopy /E /I "shaders-ubuntu" "voltray-linux\shaders" >nul
     powershell -command "Compress-Archive -Path 'voltray-linux\*' -DestinationPath 'voltray-linux.zip' -Force"
     rmdir /s /q voltray-linux
     echo [SUCCESS] Created voltray-linux.zip

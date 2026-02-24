@@ -138,7 +138,7 @@ add_subdirectory(src/editor)
 add_executable(Voltray
     src/Main.cpp
     ${IMGUI_SOURCES}
-    ${CMAKE_SOURCE_DIR}/Vendor/glad/src/gl.c
+    ${CMAKE_SOURCE_DIR}/vendor/glad/src/gl.c
 )
 
 # Copy resources to build output directory for runtime access
@@ -164,7 +164,7 @@ target_link_libraries(Voltray PRIVATE
 # Setup include directories for the main executable
 target_include_directories(Voltray PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/Vendor/glad/include
+    ${CMAKE_SOURCE_DIR}/vendor/glad/include
     ${glfw_SOURCE_DIR}/include
     ${IMGUI_DIR}
     ${IMGUI_BACKEND_DIR}
