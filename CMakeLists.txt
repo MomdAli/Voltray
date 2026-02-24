@@ -129,23 +129,23 @@ set(IMGUI_SOURCES
 find_package(OpenGL REQUIRED)
 
 # Add subdirectories in order of dependencies
-add_subdirectory(Math)
-add_subdirectory(Utils)
-add_subdirectory(Engine)
-add_subdirectory(Editor)
+add_subdirectory(src/math)
+add_subdirectory(src/utils)
+add_subdirectory(src/engine)
+add_subdirectory(src/editor)
 
 # Create the main executable
 add_executable(Voltray
-    Main.cpp
+    src/Main.cpp
     ${IMGUI_SOURCES}
     ${CMAKE_SOURCE_DIR}/Vendor/glad/src/gl.c
 )
 
-# Copy Resources to build output directory for runtime access
+# Copy resources to build output directory for runtime access
 add_custom_command(TARGET Voltray POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/$<CONFIG>/Resources
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Resources ${CMAKE_BINARY_DIR}/$<CONFIG>/Resources
-    COMMENT "Copying Resources folder to build output directory"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/$<CONFIG>/resources
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources ${CMAKE_BINARY_DIR}/$<CONFIG>/resources
+    COMMENT "Copying resources folder to build output directory"
     VERBATIM
 )
 
