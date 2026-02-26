@@ -10,11 +10,11 @@
             "compileCommands": "${workspaceFolder}/build/compile_commands.json",
             "includePath": [
                 "${workspaceFolder}/src/**",
-                "${workspaceFolder}/Engine/**",
-                "${workspaceFolder}/Editor/**",
-                "${workspaceFolder}/Math/**",
-                "${workspaceFolder}/Utils/**",
-                "${workspaceFolder}/Vendor/**",
+                "${workspaceFolder}/src/engine/**",
+                "${workspaceFolder}/src/editor/**",
+                "${workspaceFolder}/src/math/**",
+                "${workspaceFolder}/src/utils/**",
+                "${workspaceFolder}/vendor/**",
                 "${workspaceFolder}/build/_deps/**/include",
                 "${workspaceFolder}/build/_deps/imgui-src",
                 "${workspaceFolder}/build/_deps/imgui-src/backends"
@@ -22,11 +22,11 @@
             "browse": {
                 "path": [
                     "${workspaceFolder}/src",
-                    "${workspaceFolder}/Engine",
-                    "${workspaceFolder}/Editor",
-                    "${workspaceFolder}/Math",
-                    "${workspaceFolder}/Utils",
-                    "${workspaceFolder}/Vendor"
+                    "${workspaceFolder}/src/engine",
+                    "${workspaceFolder}/src/editor",
+                    "${workspaceFolder}/src/math",
+                    "${workspaceFolder}/src/utils",
+                    "${workspaceFolder}/vendor"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
@@ -41,11 +41,11 @@
             "compileCommands": "${workspaceFolder}/build/compile_commands.json",
             "includePath": [
                 "${workspaceFolder}/src/**",
-                "${workspaceFolder}/Engine/**",
-                "${workspaceFolder}/Editor/**",
-                "${workspaceFolder}/Math/**",
-                "${workspaceFolder}/Utils/**",
-                "${workspaceFolder}/Vendor/**",
+                "${workspaceFolder}/src/engine/**",
+                "${workspaceFolder}/src/editor/**",
+                "${workspaceFolder}/src/math/**",
+                "${workspaceFolder}/src/utils/**",
+                "${workspaceFolder}/vendor/**",
                 "${workspaceFolder}/build/_deps/**/include",
                 "${workspaceFolder}/build/_deps/imgui-src",
                 "${workspaceFolder}/build/_deps/imgui-src/backends"
@@ -53,11 +53,11 @@
             "browse": {
                 "path": [
                     "${workspaceFolder}/src",
-                    "${workspaceFolder}/Engine",
-                    "${workspaceFolder}/Editor",
-                    "${workspaceFolder}/Math",
-                    "${workspaceFolder}/Utils",
-                    "${workspaceFolder}/Vendor"
+                    "${workspaceFolder}/src/engine",
+                    "${workspaceFolder}/src/editor",
+                    "${workspaceFolder}/src/math",
+                    "${workspaceFolder}/src/utils",
+                    "${workspaceFolder}/vendor"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },

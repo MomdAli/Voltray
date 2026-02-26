@@ -1,8 +1,16 @@
 {
-    "version": "0.2.0",
+    "version": "0.0.1",
     "configurations": [
         {
-            "name": "Voltray (Windows Debug)",
+            "name": "Voltray (Windows CodeLLDB)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/Debug/Voltray.exe",
+            "cwd": "${workspaceFolder}/build/Debug",
+            "preLaunchTask": "Build Voltray (Debug)"
+        },
+        {
+            "name": "Voltray (Windows Debug MSVC)",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/Debug/Voltray.exe",

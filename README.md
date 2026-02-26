@@ -26,9 +26,23 @@ Voltray is a comprehensive 3D graphics engine designed for learning, experimenta
 ## Getting Started
 
 ### Prerequisites
-*   **C++17 Compiler** (MSVC, GCC, Clang)
+*   **C++17 Compiler**
+    *   **Windows**: MSVC (Install "Desktop development with C++" workload via Visual Studio Installer to get `cl.exe`)
+    *   **Linux**: GCC or Clang (`sudo apt install build-essential clang`)
+    *   **macOS**: Clang (via Xcode Command Line Tools)
 *   **CMake 3.17+**
 *   **Git**
+
+### IDE Setup (VS Code and forks like Cursor)
+To get full C++ IntelliSense and debugging working:
+1. Install the recommended extensions: **C/C++** (`ms-vscode.cpptools`), **CMake Tools** (`ms-vscode.cmake-tools`), and **CodeLLDB** (`vadimcn.vscode-lldb`).
+2. Open the project folder in your IDE.
+3. When prompted by CMake Tools, select the appropriate compiler kit (e.g., `Visual Studio Community 2022 Release - amd64` on Windows, or `Clang` / `GCC` on Linux).
+4. CMake Tools will automatically configure the project and generate the `compile_commands.json` needed for IntelliSense.
+
+**Debugging on Windows**:
+*   For **VS Code**, use the `"Voltray (Windows Debug MSVC)"` launch configuration.
+*   For **Cursor or Antigravity** (where Microsoft's `cppvsdbg` is unsupported), use the `"Voltray (Windows CodeLLDB)"` launch configuration instead.
 
 ### Build Instructions
 
