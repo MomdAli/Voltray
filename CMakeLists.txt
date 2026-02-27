@@ -195,7 +195,7 @@ if(DOXYGEN_FOUND)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Generating Voltray API documentation with sidebar-only theme"
         VERBATIM
-        DEPENDS ${DOXYFILE_OUT} ${CMAKE_SOURCE_DIR}/docs/header.html ${CMAKE_SOURCE_DIR}/docs/footer.html ${CMAKE_SOURCE_DIR}/docs/voltray-custom.css
+        DEPENDS ${DOXYFILE_OUT}
     )
 
     # Add a target to prepare docs for GitHub Pages (copies from docs/ to docs-github-pages)
