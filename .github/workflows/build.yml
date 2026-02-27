@@ -2,13 +2,12 @@ name: Voltray CI/CD
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, dev ]
-  workflow_dispatch:  # Allows manual triggering
+    branches: [main, dev]
+  workflow_dispatch: # Allows manual triggering
 
 env:
-  # Build type to use
   BUILD_TYPE: Release
   # Directory where build files will be generated
   BUILD_DIR: ${{ github.workspace }}/build
@@ -18,126 +17,130 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Fetch all history for proper versioning
-    - name: Cache CMake build output
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.BUILD_DIR }}
-        key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-cmake-
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for proper versioning
+      - name: Cache CMake build output
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-
 
-    - name: Set up MSVC Developer Command Prompt
-      uses: ilammy/msvc-dev-cmd@v1
+      - name: Set up MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Configure CMake
-      run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+      - name: Configure CMake
+        run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
-    - name: Build
-      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
+      - name: Build
+        run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }}
 
-    - name: Create package
-      working-directory: ${{ env.BUILD_DIR }}
-      shell: cmd
-      run: |
-        if not exist Voltray-windows mkdir Voltray-windows
-        copy ${{ env.BUILD_TYPE }}\Voltray.exe Voltray-windows\
-        xcopy /E /I ..\resources\Shaders Voltray-windows\Shaders
-        7z a Voltray-windows.zip Voltray-windows
+      - name: Create package
+        working-directory: ${{ env.BUILD_DIR }}
+        shell: cmd
+        run: |
+          cmake --install . --prefix dist --config ${{ env.BUILD_TYPE }} --component VoltrayComponent
+          7z a Voltray-windows.zip dist\
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Voltray-Windows
-        path: ${{ env.BUILD_DIR }}/Voltray-windows.zip
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Voltray-Windows
+          path: ${{ env.BUILD_DIR }}/Voltray-windows.zip
 
   macos-build:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Cache CMake build output
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.BUILD_DIR }}
-        key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-cmake-
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Cache CMake build output
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-
 
-    - name: Install dependencies
-      run: |
-        brew update
-        brew install cmake
-        brew install glfw
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake
+          brew install glfw
 
-    - name: Configure CMake
-      run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+      - name: Configure CMake
+        run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
-    - name: Build
-      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -j4
+      - name: Build
+        run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -j4
 
-    - name: Create package
-      working-directory: ${{ env.BUILD_DIR }}
-      run: |
-        mkdir -p Voltray-macos
-        cp Voltray Voltray-macos/
-        cp -R ../resources/shaders Voltray-macos/
-        zip -r Voltray-macos.zip Voltray-macos
+      - name: Create package
+        working-directory: ${{ env.BUILD_DIR }}
+        run: |
+          cmake --install . --prefix dist --config ${{ env.BUILD_TYPE }} --component VoltrayComponent
+          zip -r Voltray-macos.zip dist
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Voltray-MacOS
-        path: ${{ env.BUILD_DIR }}/Voltray-macos.zip
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Voltray-MacOS
+          path: ${{ env.BUILD_DIR }}/Voltray-macos.zip
 
   linux-build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Cache CMake build output
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.BUILD_DIR }}
-        key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-cmake-
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Cache CMake build output
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake build-essential xorg-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential xorg-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
 
-    - name: Configure CMake
-      run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+      - name: Configure CMake
+        run: cmake -B ${{ env.BUILD_DIR }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
-    - name: Build
-      run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -j$(nproc)
+      - name: Build
+        run: cmake --build ${{ env.BUILD_DIR }} --config ${{ env.BUILD_TYPE }} -j$(nproc)
 
-    - name: Create package
-      working-directory: ${{ env.BUILD_DIR }}
-      run: |
-        mkdir -p Voltray-linux
-        cp Voltray Voltray-linux/
-        cp -R ../resources/shaders Voltray-linux/
-        tar -czvf Voltray-linux.tar.gz Voltray-linux
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: Voltray-Linux
-        path: ${{ env.BUILD_DIR }}/Voltray-linux.tar.gz
+      - name: Create package
+        working-directory: ${{ env.BUILD_DIR }}
+        run: |
+          cmake --install . --prefix dist --config ${{ env.BUILD_TYPE }} --component VoltrayComponent
+          tar -czvf Voltray-linux.tar.gz dist
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Voltray-Linux
+          path: ${{ env.BUILD_DIR }}/Voltray-linux.tar.gz
 
   release:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [windows-build, macos-build, linux-build]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(grep "project.*VERSION" CMakeLists.txt | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+")
+          echo "project_version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
@@ -159,6 +162,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.version.outputs.project_version }}
+          name: Release v${{ steps.version.outputs.project_version }}
+          generate_release_notes: true
           files: |
             artifacts/Voltray-windows.zip
             artifacts/Voltray-macos.zip

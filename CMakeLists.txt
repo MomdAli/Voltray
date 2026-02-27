@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(Voltray)
+project(Voltray VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -212,3 +212,7 @@ if(DOXYGEN_FOUND)
 else()
     message(STATUS "Doxygen not found. Documentation target will not be available.")
 endif()
+
+# Install rules
+install(TARGETS Voltray DESTINATION . COMPONENT VoltrayComponent)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/resources/ DESTINATION resources COMPONENT VoltrayComponent)
