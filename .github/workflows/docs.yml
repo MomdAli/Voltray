@@ -53,7 +53,7 @@ jobs:
       - name: Upload documentation artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build/docs
+          path: docs
 
   deploy-docs:
     environment:
