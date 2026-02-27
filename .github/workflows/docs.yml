@@ -2,9 +2,9 @@ name: Documentation
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
-    branches: [main, dev]
+    branches: [main]
   workflow_dispatch: # Allows manual triggering
 
 permissions:
@@ -56,6 +56,7 @@ jobs:
           path: docs
 
   deploy-docs:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
