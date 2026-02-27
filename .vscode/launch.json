@@ -1,0 +1,40 @@
+{
+    "version": "0.0.1",
+    "configurations": [
+        {
+            "name": "Voltray (Windows CodeLLDB)",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/Debug/Voltray.exe",
+            "cwd": "${workspaceFolder}/build/Debug",
+            "preLaunchTask": "Build Voltray (Debug)"
+        },
+        {
+            "name": "Voltray (Windows Debug MSVC)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/Debug/Voltray.exe",
+            "cwd": "${workspaceFolder}/build/Debug",
+            "preLaunchTask": "Build Voltray (Debug)",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Voltray (Linux/macOS Debug)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/Voltray",
+            "cwd": "${workspaceFolder}/build",
+            "preLaunchTask": "Build Voltray (Debug)",
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "linux": {
+                "MIMode": "gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            }
+        }
+    ]
+}

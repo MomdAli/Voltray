@@ -1,0 +1,67 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Win32",
+            "intelliSenseMode": "windows-msvc-x64",
+            "compilerPath": "cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            "includePath": [
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/src/engine/**",
+                "${workspaceFolder}/src/editor/**",
+                "${workspaceFolder}/src/math/**",
+                "${workspaceFolder}/src/utils/**",
+                "${workspaceFolder}/vendor/**",
+                "${workspaceFolder}/build/_deps/**/include",
+                "${workspaceFolder}/build/_deps/imgui-src",
+                "${workspaceFolder}/build/_deps/imgui-src/backends"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/src",
+                    "${workspaceFolder}/src/engine",
+                    "${workspaceFolder}/src/editor",
+                    "${workspaceFolder}/src/math",
+                    "${workspaceFolder}/src/utils",
+                    "${workspaceFolder}/vendor"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "configurationProvider": "ms-vscode.cmake-tools"
+        },
+        {
+            "name": "Linux",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            "includePath": [
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/src/engine/**",
+                "${workspaceFolder}/src/editor/**",
+                "${workspaceFolder}/src/math/**",
+                "${workspaceFolder}/src/utils/**",
+                "${workspaceFolder}/vendor/**",
+                "${workspaceFolder}/build/_deps/**/include",
+                "${workspaceFolder}/build/_deps/imgui-src",
+                "${workspaceFolder}/build/_deps/imgui-src/backends"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/src",
+                    "${workspaceFolder}/src/engine",
+                    "${workspaceFolder}/src/editor",
+                    "${workspaceFolder}/src/math",
+                    "${workspaceFolder}/src/utils",
+                    "${workspaceFolder}/vendor"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ]
+}
