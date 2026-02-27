@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(Voltray)
+project(Voltray VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -53,7 +53,7 @@ set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "Disable Assimp samples")
 set(ASSIMP_INSTALL OFF CACHE BOOL "Disable Assimp install")
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "Disable warnings as errors for Assimp")
 set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable all exporters to speed up build")
-set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "Build zlib from source")
+set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "Build zlib from source")
 set(BUILD_TESTING OFF CACHE BOOL "Disable testing")
 set(ASSIMP_UNIT_TESTS OFF CACHE BOOL "Disable unit tests")
 set(ASSIMP_HUNTER_ENABLED OFF CACHE BOOL "Disable Hunter package manager")
@@ -195,7 +195,7 @@ if(DOXYGEN_FOUND)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Generating Voltray API documentation with sidebar-only theme"
         VERBATIM
-        DEPENDS ${DOXYFILE_OUT} ${CMAKE_SOURCE_DIR}/docs/header.html ${CMAKE_SOURCE_DIR}/docs/footer.html ${CMAKE_SOURCE_DIR}/docs/voltray-custom.css
+        DEPENDS ${DOXYFILE_OUT}
     )
 
     # Add a target to prepare docs for GitHub Pages (copies from docs/ to docs-github-pages)
@@ -212,3 +212,7 @@ if(DOXYGEN_FOUND)
 else()
     message(STATUS "Doxygen not found. Documentation target will not be available.")
 endif()
+
+# Install rules
+install(TARGETS Voltray DESTINATION . COMPONENT VoltrayComponent)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/resources/ DESTINATION resources COMPONENT VoltrayComponent)

@@ -2,8 +2,10 @@ name: Documentation
 
 on:
   push:
-    branches: [ main, dev ]
-  workflow_dispatch:  # Allows manual triggering
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # Allows manual triggering
 
 permissions:
   contents: read
@@ -19,33 +21,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Fetch all history for proper versioning
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for proper versioning
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y doxygen graphviz cmake build-essential
+      - name: Cache CMake build output
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: ${{ runner.os }}-cmake-docs-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-docs-
 
-    - name: Configure CMake (to set up Doxygen dependencies)
-      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz cmake build-essential xorg-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
 
-    - name: Generate documentation
-      run: |
-        cd build
-        make voltray-docs
+      - name: Configure CMake (to set up Doxygen dependencies)
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
+      - name: Generate documentation
+        run: |
+          cd build
+          make voltray-docs
 
-    - name: Upload documentation artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: build/docs
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload documentation artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
 
   deploy-docs:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -53,6 +64,6 @@ jobs:
     needs: build-docs
 
     steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
