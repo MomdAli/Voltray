@@ -38,8 +38,9 @@ namespace Voltray::Editor::Components::Assets
             s_currentPayload = DragDropPayload(assetPath, normalizedType, isGlobal);
             s_isDragging = true;
 
-            // Set payload data
-            ImGui::SetDragDropPayload(DRAG_DROP_ID, &s_currentPayload, sizeof(DragDropPayload));
+            // Use a marker since DragDropPayload is not safe to memcpy
+            static const char s_marker = 1;
+            ImGui::SetDragDropPayload(DRAG_DROP_ID, &s_marker, sizeof(s_marker));
 
             // Render drag preview
             ImGui::Text("Dragging: %s", s_currentPayload.fileName.c_str());
@@ -58,10 +59,10 @@ namespace Voltray::Editor::Components::Assets
         {
             if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(DRAG_DROP_ID))
             {
-                const DragDropPayload *assetPayload = static_cast<const DragDropPayload *>(payload->Data);
+                // Use static payload instead of ImGui's copied data
                 s_isDragging = false;
                 ImGui::EndDragDropTarget();
-                return assetPayload;
+                return &s_currentPayload;
             }
             ImGui::EndDragDropTarget();
         }
