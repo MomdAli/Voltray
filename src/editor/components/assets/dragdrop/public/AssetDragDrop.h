@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <string>
 
+#include <cstdio>
+
 /**
  * @file AssetDragDrop.h
  * @brief Handles drag and drop operations for assets into the viewport and other panels
@@ -16,14 +18,28 @@ namespace Voltray::Editor::Components::Assets
      */
     struct DragDropPayload
     {
-        std::filesystem::path assetPath;
-        std::string assetType;
-        std::string fileName;
+        char assetPath[512];
+        char assetType[64];
+        char fileName[256];
         bool isGlobalAsset;
 
-        DragDropPayload() = default;
+        DragDropPayload()
+        {
+            assetPath[0] = '\0';
+            assetType[0] = '\0';
+            fileName[0] = '\0';
+            isGlobalAsset = false;
+        }
+
         DragDropPayload(const std::filesystem::path &path, const std::string &type, bool global)
-            : assetPath(path), assetType(type), fileName(path.filename().string()), isGlobalAsset(global) {}
+        {
+            std::string pathStr = path.string();
+            std::snprintf(assetPath, sizeof(assetPath), "%s", pathStr.c_str());
+            std::snprintf(assetType, sizeof(assetType), "%s", type.c_str());
+            std::string fileStr = path.filename().string();
+            std::snprintf(fileName, sizeof(fileName), "%s", fileStr.c_str());
+            isGlobalAsset = global;
+        }
     };
 
     /**

@@ -38,13 +38,13 @@ namespace Voltray::Editor::Components::Assets
             s_currentPayload = DragDropPayload(assetPath, normalizedType, isGlobal);
             s_isDragging = true;
 
-            // Use a marker since DragDropPayload is not safe to memcpy
+            // Use a marker since DragDropPayload is large and we can reference s_currentPayload directly
             static const char s_marker = 1;
             ImGui::SetDragDropPayload(DRAG_DROP_ID, &s_marker, sizeof(s_marker));
 
             // Render drag preview
-            ImGui::Text("Dragging: %s", s_currentPayload.fileName.c_str());
-            ImGui::Text("Type: %s", s_currentPayload.assetType.c_str());
+            ImGui::Text("Dragging: %s", s_currentPayload.fileName);
+            ImGui::Text("Type: %s", s_currentPayload.assetType);
 
             ImGui::EndDragDropSource();
             return true;
@@ -57,9 +57,8 @@ namespace Voltray::Editor::Components::Assets
     {
         if (ImGui::BeginDragDropTarget())
         {
-            if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload(DRAG_DROP_ID))
+            if (ImGui::AcceptDragDropPayload(DRAG_DROP_ID))
             {
-                // Use static payload instead of ImGui's copied data
                 s_isDragging = false;
                 ImGui::EndDragDropTarget();
                 return &s_currentPayload;
@@ -74,27 +73,29 @@ namespace Voltray::Editor::Components::Assets
         if (!s_isDragging)
             return false;
 
+        std::string currentAssetType(s_currentPayload.assetType);
+
         // Define compatibility rules
         if (targetType == "viewport")
         {
-            return s_currentPayload.assetType == "model" ||
-                   s_currentPayload.assetType == "3d" ||
-                   s_currentPayload.assetType == "mesh" ||
-                   s_currentPayload.assetType == "texture" ||
-                   s_currentPayload.assetType == "script";
+            return currentAssetType == "model" ||
+                   currentAssetType == "3d" ||
+                   currentAssetType == "mesh" ||
+                   currentAssetType == "texture" ||
+                   currentAssetType == "script";
         }
         else if (targetType == "scene")
         {
-            return s_currentPayload.assetType == "model" ||
-                   s_currentPayload.assetType == "3d" ||
-                   s_currentPayload.assetType == "mesh" ||
-                   s_currentPayload.assetType == "script";
+            return currentAssetType == "model" ||
+                   currentAssetType == "3d" ||
+                   currentAssetType == "mesh" ||
+                   currentAssetType == "script";
         }
         else if (targetType == "inspector")
         {
-            return s_currentPayload.assetType == "texture" ||
-                   s_currentPayload.assetType == "material" ||
-                   s_currentPayload.assetType == "script";
+            return currentAssetType == "texture" ||
+                   currentAssetType == "material" ||
+                   currentAssetType == "script";
         }
 
         return false;
@@ -114,26 +115,25 @@ namespace Voltray::Editor::Components::Assets
             return false;
         }
 
-        // Get viewport scene
-        auto &viewportScene = editorApp->GetViewport()->GetScene();
-        auto &scene = viewportScene.GetScene();
+
 
         try
         {
-            if (payload.assetType == "model" || payload.assetType == "3d" || payload.assetType == "mesh")
+            std::string payloadAssetType(payload.assetType);
+            if (payloadAssetType == "model" || payloadAssetType == "3d" || payloadAssetType == "mesh")
             {
                 return LoadModelAsset(payload.assetPath, dropPosition);
             }
-            else if (payload.assetType == "texture")
+            else if (payloadAssetType == "texture")
             {
                 return ApplyTextureAsset(payload.assetPath);
             }
-            else if (payload.assetType == "script")
+            else if (payloadAssetType == "script")
             {
                 return AttachScriptAsset(payload.assetPath);
             }
 
-            Console::PrintWarning("Unsupported asset type for viewport drop: " + payload.assetType);
+            Console::PrintWarning("Unsupported asset type for viewport drop: " + payloadAssetType);
             return false;
         }
         catch (const std::exception &e)
@@ -170,28 +170,30 @@ namespace Voltray::Editor::Components::Assets
         // Simple icon based on asset type
         ImVec2 center = ImVec2(iconMin.x + iconSize.x * 0.5f, iconMin.y + iconSize.y * 0.5f);
 
-        if (s_currentPayload.assetType == "model" || s_currentPayload.assetType == "3d")
+        std::string currentAssetType(s_currentPayload.assetType);
+
+        if (currentAssetType == "model" || currentAssetType == "3d")
         {
             // Draw a simple 3D cube icon
             drawList->AddRect(ImVec2(center.x - 8, center.y - 8), ImVec2(center.x + 8, center.y + 8),
-                              IM_COL32(100, 150, 255, 255), 0.0f, 0, 2.0f);
+                               IM_COL32(100, 150, 255, 255), 0.0f, 0, 2.0f);
         }
-        else if (s_currentPayload.assetType == "texture")
+        else if (currentAssetType == "texture")
         {
             // Draw a simple image icon
             drawList->AddRectFilled(ImVec2(center.x - 8, center.y - 8), ImVec2(center.x + 8, center.y + 8),
                                     IM_COL32(255, 200, 100, 255));
         }
-        else if (s_currentPayload.assetType == "script")
+        else if (currentAssetType == "script")
         {
             // Draw a simple document icon
             drawList->AddRect(ImVec2(center.x - 6, center.y - 8), ImVec2(center.x + 6, center.y + 8),
-                              IM_COL32(150, 255, 150, 255), 0.0f, 0, 2.0f);
+                               IM_COL32(150, 255, 150, 255), 0.0f, 0, 2.0f);
         }
 
         // File name tooltip
         drawList->AddText(ImVec2(iconMax.x + 5, iconMin.y), IM_COL32(255, 255, 255, 255),
-                          s_currentPayload.fileName.c_str());
+                          s_currentPayload.fileName);
     }
 
     bool AssetDragDrop::CreateSceneObjectFromAsset(const DragDropPayload &payload, const ImVec2 &position)
@@ -203,7 +205,6 @@ namespace Voltray::Editor::Components::Assets
         }
 
         auto &viewportScene = editorApp->GetViewport()->GetScene();
-        auto &scene = viewportScene.GetScene();
         auto &camera = viewportScene.GetCamera();
 
         // Convert screen position to world position using camera ray casting
@@ -216,7 +217,7 @@ namespace Voltray::Editor::Components::Assets
         // Create scene object at the calculated position
         // This will depend on your scene object creation system
         // For now, we'll just log the operation
-        Console::Print("Creating scene object from asset: " + payload.fileName +
+        Console::Print(std::string("Creating scene object from asset: ") + payload.fileName +
                        " at position (" + std::to_string(worldPosition.x) + ", " +
                        std::to_string(worldPosition.y) + ", " + std::to_string(worldPosition.z) + ")");
 
